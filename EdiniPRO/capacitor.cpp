@@ -238,7 +238,7 @@ bool Capacitor::insertID(int id)
         std::cout << "Data inserted" << std::endl;
 
     if (DebugTrace(1000))
-        mu::getTracer() << "Insert finished!\n";
+        mu::getTracer() << "Insert fixdsrfsernished!\n";
     return bRet;
 }
 

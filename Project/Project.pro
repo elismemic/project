@@ -46,10 +46,10 @@ DEFINES += _SCL_SECURE_NO_WARNINGS
 DEFINES += TRACE_APP
 
 #lib settings for debug
-LIBS += -LC:\Users\Edin\Desktop\cpp\DB_Libs -lmyUtilsD
-LIBS += -LC:\Users\Edin\Desktop\cpp\DB_Libs -lSQLDatabaseD
+LIBS += -LC:\cpp\DB_Libs -lmyUtilsD
+LIBS += -LC:\cpp\DB_Libs -lSQLDatabaseD
 
-LIBS += -LC:\Users\Edin\Desktop\cpp\boost\bin
+LIBS += -LC:\cpp\boost\bin
 
-INCLUDEPATH += C:\Users\Edin\Desktop\cpp\DB_Includes
-INCLUDEPATH += C:\Users\Edin\Desktop\cpp\boost\include
+INCLUDEPATH += C:\cpp\DB_Includes
+INCLUDEPATH += C:\cpp\boost\include

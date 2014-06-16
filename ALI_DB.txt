@@ -1,0 +1,276 @@
+CREATE TABLE [CatAsynchronousMotor] (
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idNumberOfPhases] TINYINT CONSTRAINT [idNumberOfPhases] REFERENCES [NumberOfPhases]([ID]), 
+  [idRatedVoltage] TINYINT CONSTRAINT [idRatedVoltage] REFERENCES [RatedVoltage]([ID]), 
+  [nomMechPow] REAL, 
+  [powerFactor] REAL, 
+  [efficiency] REAL, 
+  [loadFactor] REAL, 
+  [rpm] INT, 
+  [Isu_In] REAL, 
+  [r_x] REAL, 
+  CONSTRAINT [catNamingFk] FOREIGN KEY([TypeID], [ID]) REFERENCES [catNaming]([TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_CatAsynchronousMotor_1] PRIMARY KEY ([JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [CatEnergyConsumer] (
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(64) NOT NULL ON CONFLICT FAIL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idRatedVoltage] TINYINT CONSTRAINT [idRatedVoltage] REFERENCES [RatedVoltage]([ID]), 
+  [kp0] REAL, 
+  [kq0] REAL, 
+  [kp1] REAL, 
+  [kq1] REAL, 
+  [kp2] REAL, 
+  [kq2] REAL, 
+  CONSTRAINT [catNamingFk] FOREIGN KEY([TypeID], [ID]) REFERENCES [catNaming]([TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_CatEnergyConsumer_1] PRIMARY KEY ([JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [CatGeneratingUnit] (
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idRatedVoltage] INT CONSTRAINT [idRatedVoltage] REFERENCES [RatedVoltage]([ID]), 
+  [idRatedPower] INT CONSTRAINT [idRatedPower] REFERENCES [RatedPower]([ID]), 
+  [idNumberOfPhases] INT CONSTRAINT [idNumberOfPhases] REFERENCES [NumberOfPhases]([ID]), 
+  [idConnectionType] INT CONSTRAINT [idConnectionType] REFERENCES [ConnectionTypePrimary]([ID]), 
+  [minOpActPow] REAL, 
+  [maxOpActPow] REAL, 
+  [minOpReActPow] REAL, 
+  [maxOpReActPow] REAL, 
+  [Z0_re] REAL, 
+  [Z0_im] REAL, 
+  [Z1_re] REAL, 
+  [Z1_im] REAL, 
+  [Z2_re] REAL, 
+  [Z2_im] REAL, 
+  [Z0trans_re] REAL, 
+  [Z0trans_im] REAL, 
+  [Z1trans_re] REAL, 
+  [Z1trans_im] REAL, 
+  [Z2trans_re] REAL, 
+  [Z2trans_im] REAL, 
+  [Z0sub_re] REAL, 
+  [Z0sub_im] REAL, 
+  [Z1sub_re] REAL, 
+  [Z1sub_im] REAL, 
+  [Z2sub_re] REAL, 
+  [Z2sub_im] REAL, 
+  CONSTRAINT [catNamingFk] FOREIGN KEY([TypeID], [ID]) REFERENCES [catNaming]([TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_CatGeneratingUnit_1] PRIMARY KEY ([JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [catNaming] (
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL CONSTRAINT [typeIDfk] REFERENCES [EnumPSTypes]([ID]), 
+  [ProducerID] INTEGER NOT NULL CONSTRAINT [producerIDfk] REFERENCES [Producers]([ID]), 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL, 
+  CONSTRAINT [sqlite_autoindex_catNaming_1] PRIMARY KEY ([TypeID], [ID]));
+
+
+CREATE TABLE [CatResistor] (
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idRatedVoltage] TINYINT CONSTRAINT [idRatedVoltage] REFERENCES [RatedVoltage]([ID]), 
+  [r] REAL, 
+  [x] REAL, 
+  CONSTRAINT [catNamingFk] FOREIGN KEY([TypeID], [ID]) REFERENCES [catNaming]([TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_CatResistor_1] PRIMARY KEY ([JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [ConnectionTypePrimary] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [shortName] NVARCHAR(6), 
+  [Name] NVARCHAR(64), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [EnumPSTypes] (
+  [ID] SMALLINT NOT NULL ON CONFLICT FAIL PRIMARY KEY, 
+  [Name] VARCHAR(32) NOT NULL ON CONFLICT FAIL);
+
+
+CREATE TABLE [JobCatalogs] (
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [CatID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [CatName] NVARCHAR(64) NOT NULL, 
+  CONSTRAINT [catNamingFk] FOREIGN KEY([TypeID], [CatID], [CatName]) REFERENCES [catNaming]([TypeID], [ID], [Name]), 
+  CONSTRAINT [sqlite_autoindex_JobCatalogs_1] PRIMARY KEY ([JobID], [TypeID], [CatID]));
+
+
+CREATE TABLE [JobPlacements] (
+  [SystemID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [CatID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [CatName] NVARCHAR(64) NOT NULL, 
+  CONSTRAINT [plaNamingFk] FOREIGN KEY([SystemID], [TypeID], [CatID], [CatName]) REFERENCES [PlacementNaming]([SystemID], [TypeID], [ID], [Name]), 
+  CONSTRAINT [sqlite_autoindex_JobPlacements_1] PRIMARY KEY ([SystemID], [JobID], [TypeID], [CatID]));
+
+
+CREATE TABLE [Jobs] (
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL, 
+  [UserID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [userIDfk] REFERENCES [Users]([ID]), 
+  [Status] INTEGER, 
+  [CreationDate] INT NOT NULL ON CONFLICT FAIL, 
+  [ActivationDate] INT);
+
+
+CREATE TABLE [LoadDemandModel] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Name] NVARCHAR(64), 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [ElementType] INTEGER, 
+  [ScheduleType] TINYINT);
+
+
+CREATE TABLE [LoadType] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [AliasName] NVARCHAR(32), 
+  [Name] NVARCHAR(64), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [NodeType] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [shortName] NVARCHAR(16), 
+  [Name] NVARCHAR(64), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [NumberOfPhases] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [Value] TINYINT, 
+  [Name] NVARCHAR(16), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [PhaseCode] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [shortName] NVARCHAR(16), 
+  [Name] NVARCHAR(64), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [PlacAsynchronousMotor] (
+  [SystemID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idPhaseCode] INT CONSTRAINT [idPhaseCode] REFERENCES [PhaseCode]([ID]), 
+  [idCatalogType] INT, 
+  [idConnectionType] INT CONSTRAINT [idConnectionType] REFERENCES [ConnectionTypePrimary]([ID]), 
+  CONSTRAINT [placNamingFk] FOREIGN KEY([SystemID], [TypeID], [ID]) REFERENCES [PlacementNaming]([SystemID], [TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_PlacAsynchronousMotor_1] PRIMARY KEY ([SystemID], [JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [PlacementNaming] (
+  [SystemID] INTEGER NOT NULL CONSTRAINT [systemIDfk] REFERENCES [Systems]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL CONSTRAINT [typeIDfk] REFERENCES [EnumPSTypes]([ID]), 
+  [ProducerID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [producerIDfk] REFERENCES [Producers]([ID]), 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL, 
+  CONSTRAINT [sqlite_autoindex_PlacementNaming_1] PRIMARY KEY ([SystemID], [TypeID], [ID]));
+
+
+CREATE TABLE [PlacGeneratingUnit] (
+  [SystemID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idPhaseCode] TINYINT CONSTRAINT [idPhaseCode] REFERENCES [PhaseCode]([ID]), 
+  [idCatalogType] TINYINT, 
+  [idNodeType] TINYINT CONSTRAINT [idNodeType] REFERENCES [NodeType]([ID]), 
+  [idLoadType] TINYINT CONSTRAINT [idLoadType] REFERENCES [LoadType]([ID]), 
+  [idLoadDemandModel] TINYINT CONSTRAINT [idLoadDemandModel] REFERENCES [LoadDemandModel]([ID]), 
+  [desiredVoltage] REAL, 
+  [grounded] TINYINT, 
+  [rGround] REAL, 
+  [xGround] REAL, 
+  CONSTRAINT [placNamingFk] FOREIGN KEY([SystemID], [TypeID], [ID]) REFERENCES [PlacementNaming]([SystemID], [TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_PlacGeneratingUnit_1] PRIMARY KEY ([SystemID], [JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [PlacResistor] (
+  [SystemID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [JobID] INTEGER NOT NULL ON CONFLICT FAIL CONSTRAINT [jobIDfk] REFERENCES [Jobs]([ID]), 
+  [TypeID] SMALLINT NOT NULL ON CONFLICT FAIL, 
+  [ProducerID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL, 
+  [Name] NVARCHAR(128) NOT NULL, 
+  [AliasName] NVARCHAR(32), 
+  [Description] NVARCHAR(512), 
+  [idCatalogType] INT, 
+  CONSTRAINT [placNamingFk] FOREIGN KEY([SystemID], [TypeID], [ID]) REFERENCES [PlacementNaming]([SystemID], [TypeID], [ID]), 
+  CONSTRAINT [sqlite_autoindex_PlacResistor_1] PRIMARY KEY ([SystemID], [JobID], [TypeID], [ID]));
+
+
+CREATE TABLE [Producers] (
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL);
+
+
+CREATE TABLE [RatedPower] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [Value] REAL, 
+  [Name] NVARCHAR(64), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [RatedVoltage] (
+  [ID] INTEGER NOT NULL PRIMARY KEY, 
+  [Code] TINYINT, 
+  [Value] FLOAT, 
+  [Name] NVARCHAR(64), 
+  [Description] NVARCHAR(512));
+
+
+CREATE TABLE [Systems] (
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY, 
+  [Name] NVARCHAR(128) NOT NULL ON CONFLICT FAIL);
+
+
+CREATE TABLE [Users] (
+  [ID] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY, 
+  [Name] NVARCHAR(64) NOT NULL ON CONFLICT FAIL, 
+  [Password] VARCHAR(32) NOT NULL ON CONFLICT FAIL);
+
+

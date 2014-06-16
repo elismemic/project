@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ReactorBankPlacement</class>
+ <widget class="QDialog" name="ReactorBankPlacement">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>454</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="reactorBPName_lineEdit"/>
+     </item>
+     <item row="7" column="1">
+      <widget class="QComboBox" name="reactorBPNLC_comboBox">
+       <item>
+        <property name="text">
+         <string>Yes</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>No</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="13" column="0" colspan="2">
+      <widget class="QTextEdit" name="reactorBPDescription_textEdit"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_23">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QComboBox" name="reactorBPBC_comboBox">
+       <item>
+        <property name="text">
+         <string>No control</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Volt/VAr control</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Voltage regulation</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Time switched control</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_14">
+       <property name="text">
+        <string>Bank Control:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QComboBox" name="reactorBPPC_comboBox">
+       <item>
+        <property name="text">
+         <string>A</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>B</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>C</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ABC</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLineEdit" name="reactorBPNormSect_lineEdit"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Alias:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_13">
+       <property name="text">
+        <string>Phase Code:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QComboBox" name="reactorBPBankType_comboBox">
+       <item>
+        <property name="text">
+         <string>Shunt</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Serial</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_20">
+       <property name="text">
+        <string>Bank Type: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_19">
+       <property name="text">
+        <string>UID:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="label_22">
+       <property name="text">
+        <string>Load Demand Model:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="reactorBPCatType_comboBox">
+       <item>
+        <property name="text">
+         <string>CapBank -20 kV -500 kVAr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CapBank -20 kV -250 kVAr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CapBank -20 kV -1000 kVAr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CapBank -20 kV -100 kVAr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CapBank -20 kV -2500 kVAr</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="reactorBPUID_lineEdit"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="reactorBPsystemID_lineEdit"/>
+     </item>
+     <item row="11" column="1">
+      <widget class="QComboBox" name="reactorBPLDM_comboBox">
+       <item>
+        <property name="text">
+         <string>Commercial</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Culture</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>EDC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Education</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>EMB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Goverment</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HLS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Hospital</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>IND</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Others</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>R/C</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Recidential</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>RES</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>RLG</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Utility</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>VIP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AGR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Undefined</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Generation</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Capacitor bank</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>No Load Control: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_21">
+       <property name="text">
+        <string>Normal Section [1]:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="reactorBPAlias_lineEdit"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>Catalog Type:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_12">
+       <property name="text">
+        <string>SystemID:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Description:</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="reactorBPButtons_buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

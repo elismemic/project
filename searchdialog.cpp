@@ -3242,7 +3242,7 @@ void searchDialog::catConsClicked(int jobID)
         }
         else
         {
-            messageBox exist(0,this);
+            messageBox exist(2,this);
             exist.show();
             exist.exec();
         }
@@ -3372,7 +3372,7 @@ void searchDialog::catUnitClicked(int jobID)
         }
         else
         {
-            messageBox exist(0,this);
+            messageBox exist(2,this);
             exist.show();
             exist.exec();
         }
@@ -3484,7 +3484,7 @@ void searchDialog::catMotorClicked(int jobID)
         }
         else
         {
-            messageBox exist(0,this);
+            messageBox exist(2,this);
             exist.show();
             exist.exec();
         }
@@ -3569,7 +3569,7 @@ void searchDialog::plaMotorClicked(int jobID)
         }
         else
         {
-            messageBox exist(0,this);
+            messageBox exist(2,this);
             exist.show();
             exist.exec();
         }
@@ -3661,7 +3661,7 @@ void searchDialog::plaUnitClicked(int jobID)
         }
         else
         {
-            messageBox exist(0,this);
+            messageBox exist(2,this);
             exist.show();
             exist.exec();
         }
@@ -3744,7 +3744,7 @@ void searchDialog::plaResistorClicked(int jobID)
             }
             else
             {
-                messageBox exist(0,this);
+                messageBox exist(2,this);
                 exist.show();
                 exist.exec();
             }

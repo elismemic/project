@@ -14,7 +14,7 @@ class browse : public QDialog
     Q_OBJECT
 
 public:
-    explicit browse(int jobID = 0, QWidget *parent = 0);
+    explicit browse(int jobID = 0, int refUserJob = 0, QWidget *parent = 0);
     ~browse();
 
     QSortFilterProxyModel *proxy;
@@ -47,6 +47,7 @@ public:
     void plaResistorEdtClicked();
 
     int refJobID;
+    int ref2UserJob;
 
 private slots:
     void on_pushButton_3_clicked();

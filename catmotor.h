@@ -17,21 +17,21 @@ public:
     ~catMotor();
 
     void setJobID(int jobID);
-    void setProducer(MyModel *n, int a);
+    void setProducer(MyModel *n, int a, int b);
     void setID(const int n);
-    void setID2(const QString n);
-    void setName(const QString n);
-    void setAliasName(const QString n);
-    void setRatedVoltage(MyModel *n, int a);
-    void setNumberOfPhases(MyModel *n, int a);
-    void setnmp(const float n);
-    void setpow(const float n);
-    void seteff(const float n);
-    void setload(const float n);
-    void setrpm(const int n);
-    void setisu(const float n);
-    void setrx(const float n);
-    void setDescription(const QString n);
+    void setDisabledID(const QString n);
+    void setName(const QString n, int b);
+    void setAliasName(const QString n, int b);
+    void setRatedVoltage(MyModel *n, int a, int b);
+    void setNumberOfPhases(MyModel *n, int a, int b);
+    void setnmp(const float n, int b);
+    void setpow(const float n, int b);
+    void seteff(const float n, int b);
+    void setload(const float n, int b);
+    void setrpm(const int n, int b);
+    void setisu(const float n, int b);
+    void setrx(const float n, int b);
+    void setDescription(const QString n, int b);
 
     int typeID() const;
     QString prodName();

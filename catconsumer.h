@@ -17,19 +17,19 @@ public:
     ~catConsumer();
 
     void setJobID(int jobID);
-    void setProducer(MyModel *n, int a);
+    void setProducer(MyModel *n, int a, int b);
     void setID(const int n);
-    void setID2(const QString n);
-    void setName(const QString n);
-    void setAliasName(const QString n);
-    void setRatedVoltage(MyModel *n, int ind);
-    void setKP0(const float n);
-    void setKQ0(const float n);
-    void setKP1(const float n);
-    void setKQ1(const float n);
-    void setKP2(const float n);
-    void setKQ2(const float n);
-    void setDescription(const QString n);
+    void setDisabledID(const QString n);
+    void setName(const QString n, int b);
+    void setAliasName(const QString n, int b);
+    void setRatedVoltage(MyModel *n, int ind, int b);
+    void setKP0(const float n, int b);
+    void setKQ0(const float n, int b);
+    void setKP1(const float n, int b);
+    void setKQ1(const float n, int b);
+    void setKP2(const float n, int b);
+    void setKQ2(const float n, int b);
+    void setDescription(const QString n, int b);
 
     int typeID() const;
     QString prodName();
@@ -47,7 +47,6 @@ public:
 
 private slots:
     void on_buttonBox_accepted();
-
     void on_buttonBox_rejected();
 
 private:

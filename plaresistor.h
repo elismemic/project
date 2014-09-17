@@ -20,7 +20,7 @@ public:
     void setJobID(int jobID);
     void setProducer(MyModel *n, int a);
     void setID(const int n);
-    void setID2(const QString n);
+    void setDisabledID(const QString n);
     void setName(const QString n);
     void setAliasName(const QString n);
     void setCatalogType(MyModel *n, int a);

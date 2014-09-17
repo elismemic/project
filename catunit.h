@@ -17,38 +17,38 @@ public:
     ~catUnit();
 
     void setJobID(int jobID);
-    void setProducer(MyModel *n, int a);
+    void setProducer(MyModel *n, int a, int b);
     void setID(const int n);
-    void setID2(const QString n);
-    void setName(const QString n);
-    void setAliasName(const QString n);
-    void setRatedVoltage(MyModel *n, int i);
-    void setRatedPower(MyModel *n, int i);
-    void setNumberOfPhases(MyModel *n, int i);
-    void setConnectionType(MyModel *n, int i);
-    void setminOpAcPow(const float n);
-    void setmaxOpAcPow(const float n);
-    void setminOpRPow(const float n);
-    void setmaxOpRPow(const float n);
-    void setZ0_re(const float n);
-    void setZ0_im(const float n);
-    void setZ1_re(const float n);
-    void setZ1_im(const float n);
-    void setZ2_re(const float n);
-    void setZ2_im(const float n);
-    void setZ0trans_re(const float n);
-    void setZ0trans_im(const float n);
-    void setZ1trans_re(const float n);
-    void setZ1trans_im(const float n);
-    void setZ2trans_re(const float n);
-    void setZ2trans_im(const float n);
-    void setZ0sub_re(const float n);
-    void setZ0sub_im(const float n);
-    void setZ1sub_re(const float n);
-    void setZ1sub_im(const float n);
-    void setZ2sub_re(const float n);
-    void setZ2sub_im(const float n);
-    void setDescription(const QString n);
+    void setDisabledID(const QString n);
+    void setName(const QString n, int b);
+    void setAliasName(const QString n, int b);
+    void setRatedVoltage(MyModel *n, int i, int b);
+    void setRatedPower(MyModel *n, int i, int b);
+    void setNumberOfPhases(MyModel *n, int i, int b);
+    void setConnectionType(MyModel *n, int i, int b);
+    void setminOpAcPow(const float n, int b);
+    void setmaxOpAcPow(const float n, int b);
+    void setminOpRPow(const float n, int b);
+    void setmaxOpRPow(const float n, int b);
+    void setZ0_re(const float n, int b);
+    void setZ0_im(const float n, int b);
+    void setZ1_re(const float n, int b);
+    void setZ1_im(const float n, int b);
+    void setZ2_re(const float n, int b);
+    void setZ2_im(const float n, int b);
+    void setZ0trans_re(const float n, int b);
+    void setZ0trans_im(const float n, int b);
+    void setZ1trans_re(const float n, int b);
+    void setZ1trans_im(const float n, int b);
+    void setZ2trans_re(const float n, int b);
+    void setZ2trans_im(const float n, int b);
+    void setZ0sub_re(const float n, int b);
+    void setZ0sub_im(const float n, int b);
+    void setZ1sub_re(const float n, int b);
+    void setZ1sub_im(const float n, int b);
+    void setZ2sub_re(const float n, int b);
+    void setZ2sub_im(const float n, int b);
+    void setDescription(const QString n, int b);
 
     int typeID() const;
     QString prodName();
@@ -85,7 +85,6 @@ public:
 
 private slots:
     void on_buttonBox_accepted();
-
     void on_buttonBox_rejected();
 
 private:

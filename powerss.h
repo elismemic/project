@@ -21,6 +21,9 @@ public:
     explicit PowerSS(QWidget *parent = 0);
     ~PowerSS();
 
+    int userJob;
+    int preJ;
+
 private slots:
     void on_actionEnergy_Consumer_triggered();
 
@@ -39,6 +42,8 @@ private slots:
 private:
     Ui::PowerSS *ui;
     bool connectSQLite();
+
+friend class searchDialog;
 
 };
 

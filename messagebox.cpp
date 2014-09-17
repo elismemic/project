@@ -1,32 +1,38 @@
 #include "messagebox.h"
 #include "ui_messagebox.h"
 
+
+
 messageBox::messageBox(int i, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::messageBox)
 {
     ui->setupUi(this);
 
-//adsds
     if(i == 1)
     {
         this->setWindowTitle("Error");
+        ui->checkBox->hide();
+        this->setWindowIcon(QIcon("C:/Users/Ali/Desktop/warning.png"));
         existMessage();
     }
     else if(i == 2)
     {
         this->setWindowTitle("Successful!");
         saveMessage();
+
     }
 
     else if(i == 3)
     {
         this->setWindowTitle("Error");
+        ui->checkBox->hide();
         wrondIDMessage();
     }
     else
     {
         this->setWindowTitle("Error");
+        ui->checkBox->hide();
         noConnMessage();
     }
 }
@@ -56,12 +62,15 @@ void messageBox::wrondIDMessage()
     ui->label->setText("Job Id cannot be 0!");
 }
 
-void messageBox::on_buttonBox_accepted()
+void messageBox::on_ok_clicked()
 {
     QDialog::accept();
 }
 
-void messageBox::on_buttonBox_rejected()
+void messageBox::on_checkBox_toggled(bool checked)
 {
-    this->close();
+    if(checked == true)
+        checkBox = true;
+    else
+        checkBox = false;
 }

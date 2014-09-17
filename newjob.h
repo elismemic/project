@@ -18,7 +18,7 @@ public:
     ~newJob();
 
     void setEditID(QString id);
-    void setID(QString id);
+    void setID();
     void setName(QString name);
     void setUser(MyModel *n);
     void setCDate();

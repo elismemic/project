@@ -28,10 +28,19 @@ void catMotor::setJobID(int jobID)
     }
 }
 
-void catMotor::setProducer(MyModel *n, int a)
+void catMotor::setProducer(MyModel *n, int a, int b)
 {
+    if(b == 1)
+    {
     ui->producerComboBox->setModel(n);
-    ui->producerComboBox->setCurrentIndex(a- 1);
+    ui->producerComboBox->setCurrentIndex(a);
+    }
+    else
+    {
+    ui->producerComboBox->setModel(n);
+    ui->producerComboBox->setCurrentIndex(a);
+    ui->producerComboBox->setDisabled(true);
+    }
 }
 
 void catMotor::setID(const int n)
@@ -40,79 +49,179 @@ void catMotor::setID(const int n)
     ui->uidLineEdit->setText(qStr);
 }
 
-void catMotor::setID2(const QString n)
+void catMotor::setDisabledID(const QString n)
 {
     ui->uidLineEdit->setText(n);
     ui->uidLineEdit->setDisabled(true);
 }
 
-void catMotor::setName(const QString n)
+void catMotor::setName(const QString n, int b)
 {
+    if(b == 1)
      ui->nameLineEdit->setText(n);
+    else
+    {
+        ui->nameLineEdit->setText(n);
+        ui->nameLineEdit->setDisabled(true);
+    }
+
 }
 
-void catMotor::setAliasName(const QString n)
+void catMotor::setAliasName(const QString n, int b)
 {
+    if(b == 1)
      ui->aliasLineEdit->setText(n);
+    else
+    {
+        ui->aliasLineEdit->setText(n);
+        ui->aliasLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setRatedVoltage(MyModel *n, int a)
+void catMotor::setRatedVoltage(MyModel *n, int a, int b)
 {
+    if(b == 1)
+    {
     ui->ratedVoltageCombo->setModel(n);
     ui->ratedVoltageCombo->setCurrentIndex(a);
+    }
+    else
+    {
+    ui->ratedVoltageCombo->setModel(n);
+    ui->ratedVoltageCombo->setCurrentIndex(a);
+    ui->ratedVoltageCombo->setDisabled(true);
+    }
 }
 
-void catMotor::setNumberOfPhases(MyModel *n, int a)
+void catMotor::setNumberOfPhases(MyModel *n, int a, int b)
 {
+    if(b == 1)
+    {
     ui->numberofphasesCombo->setModel(n);
     ui->numberofphasesCombo->setCurrentIndex(a);
+    }
+    else
+    {
+    ui->numberofphasesCombo->setModel(n);
+    ui->numberofphasesCombo->setCurrentIndex(a);
+    ui->numberofphasesCombo->setDisabled(true);
+    }
 }
 
-void catMotor::setnmp(const float n)
+void catMotor::setnmp(const float n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->nominalLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->nominalLineEdit->setText(qStr);
+    ui->nominalLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setpow(const float n)
+void catMotor::setpow(const float n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->powerLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->powerLineEdit->setText(qStr);
+    ui->powerLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::seteff(const float n)
+void catMotor::seteff(const float n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->efficiencyLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->efficiencyLineEdit->setText(qStr);
+    ui->efficiencyLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setload(const float n)
+void catMotor::setload(const float n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->loadLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->loadLineEdit->setText(qStr);
+    ui->loadLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setrpm(const int n)
+void catMotor::setrpm(const int n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->rpmLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->rpmLineEdit->setText(qStr);
+    ui->rpmLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setisu(const float n)
+void catMotor::setisu(const float n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->istartLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->istartLineEdit->setText(qStr);
+    ui->istartLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setrx(const float n)
+void catMotor::setrx(const float n, int b)
 {
+    if(b == 1)
+    {
     QString qStr = QString::number(n);
     ui->rxLineEdit->setText(qStr);
+    }
+    else
+    {
+    QString qStr = QString::number(n);
+    ui->rxLineEdit->setText(qStr);
+    ui->rxLineEdit->setDisabled(true);
+    }
 }
 
-void catMotor::setDescription(const QString n)
+void catMotor::setDescription(const QString n, int b)
 {
+    if(b == 1)
      ui->descriptionTextEdit->setText(n);
+    else
+    {
+        ui->descriptionTextEdit->setText(n);
+        ui->descriptionTextEdit->setDisabled(true);
+    }
 }
 
 int catMotor::typeID() const

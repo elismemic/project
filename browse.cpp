@@ -16,7 +16,7 @@
 
 extern db::ISQLDatabase *pDB;
 
-browse::browse(int jobID, QWidget *parent) :
+browse::browse(int jobID, int refUserJob, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::browse)
 {
@@ -26,6 +26,7 @@ browse::browse(int jobID, QWidget *parent) :
     ui->comboBox->setCurrentIndex(1);
     ui->comboBox_2->setCurrentIndex(1);
     refJobID = jobID;
+    ref2UserJob = refUserJob;
     this->setWindowTitle("Browse Catalogs and Placements (Job ID: " + QString::number(refJobID) + ")");
     select_catalogs(refJobID);
     select_placements(refJobID);
@@ -2397,18 +2398,18 @@ void browse::catConsEdtClicked()
     setConsValues();
     catConsumer catCons(this);
     catCons.setJobID(refJobID);
-    catCons.setProducer(select_producers(), prodVal.toInt());
-    catCons.setID2(val2);
-    catCons.setName(nameVal);
-    catCons.setAliasName(aliasVal);
-    catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt());
-    catCons.setKP0(kp0Val.toFloat());
-    catCons.setKQ0(kq0Val.toFloat());
-    catCons.setKP1(kp1Val.toFloat());
-    catCons.setKQ1(kq1Val.toFloat());
-    catCons.setKP2(kp2Val.toFloat());
-    catCons.setKQ2(kq2Val.toFloat());
-    catCons.setDescription(descVal);
+    catCons.setProducer(select_producers(), prodVal.toInt(), 1);
+    catCons.setDisabledID(val2);
+    catCons.setName(nameVal, 1);
+    catCons.setAliasName(aliasVal, 1);
+    catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+    catCons.setKP0(kp0Val.toFloat(), 1);
+    catCons.setKQ0(kq0Val.toFloat(), 1);
+    catCons.setKP1(kp1Val.toFloat(), 1);
+    catCons.setKQ1(kq1Val.toFloat(), 1);
+    catCons.setKP2(kp2Val.toFloat(), 1);
+    catCons.setKQ2(kq2Val.toFloat(), 1);
+    catCons.setDescription(descVal, 1);
 
     if (catCons.exec() == QDialog::Accepted)
     {
@@ -2432,37 +2433,37 @@ void browse::catUnitEdtClicked()
     setUnitValues();
     catUnit unitCatalog(this);
     unitCatalog.setJobID(refJobID);
-    unitCatalog.setProducer(select_producers(), prodVal.toInt());
-    unitCatalog.setID2(val2);
-    unitCatalog.setName(nameVal);
-    unitCatalog.setAliasName(aliasVal);
-    unitCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt());
-    unitCatalog.setRatedPower(select_ratedPower(), rPowVal.toInt());
-    unitCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt());
-    unitCatalog.setConnectionType(select_connectionType(), cTypeVal.toInt());
-    unitCatalog.setminOpAcPow(minOpAcPowVal.toFloat());
-    unitCatalog.setmaxOpAcPow(maxOpAcPowVal.toFloat());
-    unitCatalog.setminOpRPow(minOpRPowVal.toFloat());
-    unitCatalog.setmaxOpRPow(maxOpRPowVal.toFloat());
-    unitCatalog.setZ0_re(Z0_reVal.toFloat());
-    unitCatalog.setZ0_im(Z0_imVal.toFloat());
-    unitCatalog.setZ1_re(Z1_reVal.toFloat());
-    unitCatalog.setZ1_im(Z1_imVal.toFloat());
-    unitCatalog.setZ2_re(Z2_reVal.toFloat());
-    unitCatalog.setZ2_im(Z2_imVal.toFloat());
-    unitCatalog.setZ0trans_re(Z0trans_reVal.toFloat());
-    unitCatalog.setZ0trans_im(Z0trans_imVal.toFloat());
-    unitCatalog.setZ1trans_re(Z1trans_reVal.toFloat());
-    unitCatalog.setZ1trans_im(Z1trans_imVal.toFloat());
-    unitCatalog.setZ2trans_re(Z2trans_reVal.toFloat());
-    unitCatalog.setZ2trans_im(Z2trans_imVal.toFloat());
-    unitCatalog.setZ0sub_re(Z0sub_reVal.toFloat());
-    unitCatalog.setZ0sub_im(Z0sub_imVal.toFloat());
-    unitCatalog.setZ1sub_re(Z1sub_reVal.toFloat());
-    unitCatalog.setZ1sub_im(Z1sub_imVal.toFloat());
-    unitCatalog.setZ2sub_re(Z2sub_reVal.toFloat());
-    unitCatalog.setZ2sub_im(Z2sub_imVal.toFloat());
-    unitCatalog.setDescription(descVal);
+    unitCatalog.setProducer(select_producers(), prodVal.toInt(), 0);
+    unitCatalog.setDisabledID(val2);
+    unitCatalog.setName(nameVal, 0);
+    unitCatalog.setAliasName(aliasVal, 0);
+    unitCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 0);
+    unitCatalog.setRatedPower(select_ratedPower(), rPowVal.toInt(), 0);
+    unitCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 0);
+    unitCatalog.setConnectionType(select_connectionType(), cTypeVal.toInt(), 0);
+    unitCatalog.setminOpAcPow(minOpAcPowVal.toFloat(), 0);
+    unitCatalog.setmaxOpAcPow(maxOpAcPowVal.toFloat(), 0);
+    unitCatalog.setminOpRPow(minOpRPowVal.toFloat(), 0);
+    unitCatalog.setmaxOpRPow(maxOpRPowVal.toFloat(), 0);
+    unitCatalog.setZ0_re(Z0_reVal.toFloat(), 0);
+    unitCatalog.setZ0_im(Z0_imVal.toFloat(), 0);
+    unitCatalog.setZ1_re(Z1_reVal.toFloat(), 0);
+    unitCatalog.setZ1_im(Z1_imVal.toFloat(), 0);
+    unitCatalog.setZ2_re(Z2_reVal.toFloat(), 0);
+    unitCatalog.setZ2_im(Z2_imVal.toFloat(), 0);
+    unitCatalog.setZ0trans_re(Z0trans_reVal.toFloat(), 0);
+    unitCatalog.setZ0trans_im(Z0trans_imVal.toFloat(), 0);
+    unitCatalog.setZ1trans_re(Z1trans_reVal.toFloat(), 0);
+    unitCatalog.setZ1trans_im(Z1trans_imVal.toFloat(), 0);
+    unitCatalog.setZ2trans_re(Z2trans_reVal.toFloat(), 0);
+    unitCatalog.setZ2trans_im(Z2trans_imVal.toFloat(), 0);
+    unitCatalog.setZ0sub_re(Z0sub_reVal.toFloat(), 0);
+    unitCatalog.setZ0sub_im(Z0sub_imVal.toFloat(), 0);
+    unitCatalog.setZ1sub_re(Z1sub_reVal.toFloat(), 0);
+    unitCatalog.setZ1sub_im(Z1sub_imVal.toFloat(), 0);
+    unitCatalog.setZ2sub_re(Z2sub_reVal.toFloat(), 0);
+    unitCatalog.setZ2sub_im(Z2sub_imVal.toFloat(), 0);
+    unitCatalog.setDescription(descVal, 0);
 
     if (unitCatalog.exec() == QDialog::Accepted)
     {
@@ -2505,20 +2506,20 @@ void browse::catMotorEdtClicked()
     setMotorValues();
     catMotor motorCatalog(this);
     motorCatalog.setJobID(refJobID);
-    motorCatalog.setProducer(select_producers(), prodVal.toInt());
-    motorCatalog.setID2(val2);
-    motorCatalog.setName(nameVal);
-    motorCatalog.setAliasName(aliasVal);
-    motorCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt());
-    motorCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt());
-    motorCatalog.setnmp(nmpVal.toFloat());
-    motorCatalog.setpow(powFVal.toFloat());
-    motorCatalog.seteff(effVal.toFloat());
-    motorCatalog.setload(loadFVal.toFloat());
-    motorCatalog.setrpm(rmpVal.toFloat());
-    motorCatalog.setisu(isuVal.toFloat());
-    motorCatalog.setrx(rxVal.toFloat());
-    motorCatalog.setDescription(descVal);
+    motorCatalog.setProducer(select_producers(), prodVal.toInt(), 1);
+    motorCatalog.setDisabledID(val2);
+    motorCatalog.setName(nameVal, 1);
+    motorCatalog.setAliasName(aliasVal, 1);
+    motorCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 1);
+    motorCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+    motorCatalog.setnmp(nmpVal.toFloat(), 1);
+    motorCatalog.setpow(powFVal.toFloat(), 1);
+    motorCatalog.seteff(effVal.toFloat(), 1);
+    motorCatalog.setload(loadFVal.toFloat(), 1);
+    motorCatalog.setrpm(rmpVal.toFloat(), 1);
+    motorCatalog.setisu(isuVal.toFloat(), 1);
+    motorCatalog.setrx(rxVal.toFloat(), 1);
+    motorCatalog.setDescription(descVal, 1);
 
     if (motorCatalog.exec() == QDialog::Accepted)
     {
@@ -2546,7 +2547,7 @@ void browse::plaMotorEdtClicked()
     motorPlac.setJobID(refJobID);
     motorPlac.setSystemID(select_system(), systemVal.toInt());
     motorPlac.setProducer(select_producers(), prodVal.toInt());
-    motorPlac.setID2(val2);
+    motorPlac.setDisabledID(val2);
     motorPlac.setName(nameVal);
     motorPlac.setAliasName(aliasVal);
     motorPlac.setDescription(descVal);
@@ -2575,7 +2576,7 @@ void browse::plaUnitEdtClicked()
     unitPlacement.setJobID(refJobID);
     unitPlacement.setSystemID(select_system(), systemVal.toInt());
     unitPlacement.setProducer(select_producers(), prodVal.toInt());
-    unitPlacement.setID2(val2);
+    unitPlacement.setDisabledID(val2);
     unitPlacement.setName(nameVal);
     unitPlacement.setAliasName(aliasVal);
     unitPlacement.setDescription(descVal);
@@ -2616,7 +2617,7 @@ void browse::plaResistorEdtClicked()
     shuntResistor.setJobID(refJobID);
     shuntResistor.setSystemID(select_system(), systemVal.toInt());
     shuntResistor.setProducer(select_producers(), prodVal.toInt());
-    shuntResistor.setID2(val2);
+    shuntResistor.setDisabledID(val2);
     shuntResistor.setName(nameVal);
     shuntResistor.setAliasName(aliasVal);
     shuntResistor.setDescription(descVal);

@@ -27,10 +27,19 @@ void catConsumer::setJobID(int jobID)
     }
 }
 
-void catConsumer::setProducer(MyModel *n, int a)
+void catConsumer::setProducer(MyModel *n, int a, int b)
 {
-    ui->producerComboBox->setModel(n);
-    ui->producerComboBox->setCurrentIndex(a - 1);
+    if(b == 1)
+    {
+        ui->producerComboBox->setModel(n);
+        ui->producerComboBox->setCurrentIndex(a);
+    }
+    else
+    {
+        ui->producerComboBox->setModel(n);
+        ui->producerComboBox->setCurrentIndex(a);
+        ui->producerComboBox->setDisabled(true);
+    }
 }
 
 void catConsumer::setID(const int n)
@@ -39,67 +48,149 @@ void catConsumer::setID(const int n)
     ui->uidLineEdit->setText(qStr);
 }
 
-void catConsumer::setID2(const QString n)
+void catConsumer::setDisabledID(const QString n)
 {
     ui->uidLineEdit->setText(n);
     ui->uidLineEdit->setDisabled(true);
 }
 
-void catConsumer::setName(const QString n)
+void catConsumer::setName(const QString n, int b)
 {
-     ui->nameLineEdit->setText(n);
+    if(b == 1)
+        ui->nameLineEdit->setText(n);
+    else
+    {
+        ui->nameLineEdit->setText(n);
+        ui->nameLineEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setAliasName(const QString n)
+void catConsumer::setAliasName(const QString n, int b)
 {
+    if(b == 1)
      ui->aliasLineEdit->setText(n);
+    else
+    {
+        ui->aliasLineEdit->setText(n);
+        ui->aliasLineEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setDescription(const QString n)
+void catConsumer::setDescription(const QString n, int b)
 {
-     ui->descriptionTextEdit->setText(n);
+    if(b == 1)
+        ui->descriptionTextEdit->setText(n);
+    else
+    {
+        ui->descriptionTextEdit->setText(n);
+        ui->descriptionTextEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setRatedVoltage(MyModel *n, int ind)
+void catConsumer::setRatedVoltage(MyModel *n, int ind, int b)
 {
-    ui->ratedVoltageCombo->setModel(n);
-    ui->ratedVoltageCombo->setCurrentIndex(ind);
+    if(b == 1)
+    {
+        ui->ratedVoltageCombo->setModel(n);
+        ui->ratedVoltageCombo->setCurrentIndex(ind);
+    }
+    else
+    {
+        ui->ratedVoltageCombo->setModel(n);
+        ui->ratedVoltageCombo->setCurrentIndex(ind);
+        ui->ratedVoltageCombo->setDisabled(true);
+    }
 }
 
-void catConsumer::setKP0(const float n)
+void catConsumer::setKP0(const float n, int b)
 {
-    QString qStr = QString::number(n);
-    ui->kP0LineEdit->setText(qStr);
+    if(b == 1)
+    {
+        QString qStr = QString::number(n);
+        ui->kP0LineEdit->setText(qStr);
+    }
+    else
+    {
+        QString qStr = QString::number(n);
+        ui->kP0LineEdit->setText(qStr);
+        ui->kP0LineEdit->setDisabled(true);
+    }
+
 }
 
-void catConsumer::setKQ0(const float n)
+void catConsumer::setKQ0(const float n, int b)
 {
-    QString qStr = QString::number(n);
-    ui->kQ0LineEdit->setText(qStr);
+    if(b == 1)
+    {
+        QString qStr = QString::number(n);
+        ui->kQ0LineEdit->setText(qStr);
+    }
+    else
+    {
+        QString qStr = QString::number(n);
+        ui->kQ0LineEdit->setText(qStr);
+        ui->kQ0LineEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setKP1(const float n)
+void catConsumer::setKP1(const float n, int b)
 {
-    QString qStr = QString::number(n);
-    ui->kP1LineEdit->setText(qStr);
+    if(b == 1)
+    {
+        QString qStr = QString::number(n);
+        ui->kP1LineEdit->setText(qStr);
+    }
+    else
+    {
+        QString qStr = QString::number(n);
+        ui->kP1LineEdit->setText(qStr);
+        ui->kP1LineEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setKQ1(const float n)
+void catConsumer::setKQ1(const float n, int b)
 {
-    QString qStr = QString::number(n);
-    ui->kQ1LineEdit->setText(qStr);
+    if(b == 1)
+    {
+        QString qStr = QString::number(n);
+        ui->kQ1LineEdit->setText(qStr);
+    }
+    else
+    {
+        QString qStr = QString::number(n);
+        ui->kQ1LineEdit->setText(qStr);
+        ui->kQ1LineEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setKP2(const float n)
+void catConsumer::setKP2(const float n, int b)
 {
-    QString qStr = QString::number(n);
-    ui->kP2LineEdit->setText(qStr);
+    if(b == 1)
+    {
+        QString qStr = QString::number(n);
+        ui->kP2LineEdit->setText(qStr);
+    }
+    else
+    {
+        QString qStr = QString::number(n);
+        ui->kP2LineEdit->setText(qStr);
+        ui->kP2LineEdit->setDisabled(true);
+    }
 }
 
-void catConsumer::setKQ2(const float n)
+void catConsumer::setKQ2(const float n, int b)
 {
-    QString qStr = QString::number(n);
-    ui->kQ2LineEdit->setText(qStr);
+    if(b == 1)
+    {
+        QString qStr = QString::number(n);
+        ui->kQ2LineEdit->setText(qStr);
+    }
+    else
+    {
+        QString qStr = QString::number(n);
+        ui->kQ2LineEdit->setText(qStr);
+        ui->kQ2LineEdit->setDisabled(true);
+    }
 }
 
 int catConsumer::typeID() const

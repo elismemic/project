@@ -25,6 +25,10 @@ public:
     QString nameVal;
     int ownerVal;
     int statVal;
+    int refUserJob;
+    QString negJobID;
+    int setJobIDVal();
+    bool jobDbl;
 
 private slots:
     void on_pushButton_clicked();
@@ -49,8 +53,10 @@ private:
     Ui::searchJobs *ui;
     bool select_jobs();
     bool select_jobsValues();
-    bool insert_job(int id, QString name, int user, int status, QDate cdate, QDate adate);
-    bool update_job(QString name, int user, int status, QDate cdate, QDate adate);
+    bool insert_job(int id, QString name, int user, int status, QDate cdate, QDate adate, int editFlag);
+    bool update_job(int id, QString name, int user, int status, QDate cdate, QDate adate, int edit);
+    bool update_activatedJob(int id, QString name, int user, int status, QDate cdate, QDate adate, int edit);
+    bool update_editFlag(int jobID);
     bool update_status();
     bool update_aDate(QDate adate);
     MyModel *searchJobs::select_user();
@@ -58,14 +64,19 @@ private:
     void setModel(MyModel *n);
     QVariant getUserName(int userID);
 
-    bool updateConsJob();
+    bool updateConsJob(int newJ);
     bool updateUnitJob();
     bool updateMotorJob();
     bool updateMotorPlaJob();
     bool updateUnitPlacJob();
     bool updateShuntResJob();
-    bool updateJobCatalog();
+    bool updateJobCatalog(int newJ);
     bool updateJobPlacement();
+    QString updateRandomNumber();
+    int getJobID();
+
+    friend class searchDialog;
+    friend class newJob;
 };
 
 #endif // SEARCHJOBS_H

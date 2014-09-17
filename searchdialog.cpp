@@ -15,16 +15,26 @@
 #include "searchjobs.h"
 #include "selectjob.h"
 #include "messagebox.h"
+#include <QDate>
 
 extern db::ISQLDatabase *pDB;
+extern bool checkBox;
 
-searchDialog::searchDialog(int a, QWidget *parent) :
+searchDialog::searchDialog(int a, int refJob, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::searchDialog)
 {
     ui->setupUi(this);
     proxy = new QSortFilterProxyModel(this);
     ui->comboBox->setCurrentIndex(2);
+
+    refJob2 = refJob;
+
+    if(refJob2 >= 1)
+    {
+        ui->editPushButton->setDisabled(true);
+        ui->newPushButton->setDisabled(true);
+    }
 
     if(a==1)
     {
@@ -57,6 +67,15 @@ searchDialog::searchDialog(int a, QWidget *parent) :
         this->setWindowTitle("Search Shunt Resistor Placement");
     }
 
+    if(a == 1 || a == 2 || a == 3 || a == 4 || a == 5 || a == 6)
+    {
+        int lastItem = ui->tableView->model()->rowCount();
+        if(lastItem >= 1)
+        {
+            ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));
+        }
+    }
+
 }
 
 searchDialog::~searchDialog()
@@ -70,7 +89,18 @@ bool searchDialog::select_searchConsumer()
     if (!pDB)
         return false;
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID, ID, Name, AliasName, Description, idRatedVoltage, kp0, kq0, kp1, kq1, kp2, kq2 from catEnergyConsumer"));
+    int jobId = refJob2;
+    td::INT4 insert_jobID(jobId);
+    int editFlag = 0;
+    td::INT4 insert_editFlag(editFlag);
+
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID, ID, Name, AliasName, Description, idRatedVoltage, kp0, kq0, kp1, kq1, kp2, kq2 from catEnergyConsumer where JobID=? or EditFlag=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_jobID << insert_editFlag;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
 
@@ -293,76 +323,76 @@ bool searchDialog::select_searchMotor()
     mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID, ID, Name, AliasName, Description, idNumberOfPhases, idRatedVoltage, nomMechPow, powerFactor, efficiency, loadFactor, rpm, Isu_In, r_x from CatAsynchronousMotor"));
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(14);
-        columns[0].name = "JobID";
-        columns[0].tdType = td::int4;
-        columns[0].len = 0;
+    columns.reserve(14);
+    columns[0].name = "JobID";
+    columns[0].tdType = td::int4;
+    columns[0].len = 0;
 
-        columns[1].name = "Id";
-        columns[1].tdType = td::int4;
-        columns[1].len = 0;
+    columns[1].name = "Id";
+    columns[1].tdType = td::int4;
+    columns[1].len = 0;
 
-        columns[2].name = "Name";
-        columns[2].tdType = td::nch;
-        columns[2].len = 128;
+    columns[2].name = "Name";
+    columns[2].tdType = td::nch;
+    columns[2].len = 128;
 
-        columns[3].name = "AliasName";
-        columns[3].tdType = td::nch;
-        columns[3].len = 32;
+    columns[3].name = "AliasName";
+    columns[3].tdType = td::nch;
+    columns[3].len = 32;
 
-        columns[4].name = "Description";
-        columns[4].tdType = td::nch;
-        columns[4].len = 512;
+    columns[4].name = "Description";
+    columns[4].tdType = td::nch;
+    columns[4].len = 512;
 
-        columns[5].name = "idNumberOfPhases";
-        columns[5].tdType = td::int4;
-        columns[5].len = 0;
+    columns[5].name = "idNumberOfPhases";
+    columns[5].tdType = td::int4;
+    columns[5].len = 0;
 
-        columns[6].name = "idRatedVoltage";
-        columns[6].tdType = td::int4;
-        columns[6].len = 0;
+    columns[6].name = "idRatedVoltage";
+    columns[6].tdType = td::int4;
+    columns[6].len = 0;
 
-        columns[7].name = "nomMechPow";
-        columns[7].tdType = td::real8;
-        columns[7].len = 0;
+    columns[7].name = "nomMechPow";
+    columns[7].tdType = td::real8;
+    columns[7].len = 0;
 
-        columns[8].name = "powerFactor";
-        columns[8].tdType = td::real8;
-        columns[8].len = 0;
+    columns[8].name = "powerFactor";
+    columns[8].tdType = td::real8;
+    columns[8].len = 0;
 
-        columns[9].name = "efficiency";
-        columns[9].tdType = td::real8;
-        columns[9].len = 0;
+    columns[9].name = "efficiency";
+    columns[9].tdType = td::real8;
+    columns[9].len = 0;
 
-        columns[10].name = "loadFactor";
-        columns[10].tdType = td::real8;
-        columns[10].len = 0;
+    columns[10].name = "loadFactor";
+    columns[10].tdType = td::real8;
+    columns[10].len = 0;
 
-        columns[11].name = "rpm";
-        columns[11].tdType = td::int4;
-        columns[11].len = 0;
+    columns[11].name = "rpm";
+    columns[11].tdType = td::int4;
+    columns[11].len = 0;
 
-        columns[12].name = "Isu_In";
-        columns[12].tdType = td::real8;
-        columns[12].len = 0;
+    columns[12].name = "Isu_In";
+    columns[12].tdType = td::real8;
+    columns[12].len = 0;
 
-        columns[13].name = "r_x";
-        columns[13].tdType = td::real8;
-        columns[13].len = 0;
+    columns[13].name = "r_x";
+    columns[13].tdType = td::real8;
+    columns[13].len = 0;
 
-        db::Recordset* rs = new db::Recordset(columns);
+    db::Recordset* rs = new db::Recordset(columns);
 
-        if (!rs->load(pStat.getPtr()))
-            return false;
+    if (!rs->load(pStat.getPtr()))
+        return false;
 
-        // true for stripes
-        MyModel *model = new MyModel(this, rs, true);
+    // true for stripes
+    MyModel *model = new MyModel(this, rs, true);
 
-        setModel(0, model);
+    setModel(0, model);
 
-        chs=3;
+    chs=3;
 
-        return true;
+    return true;
 }
 
 bool searchDialog::select_searchMotorPla()
@@ -373,55 +403,55 @@ bool searchDialog::select_searchMotorPla()
     mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID, SystemID, ID, Name, AliasName, Description, idPhaseCode, idCatalogType, idConnectionType from PlacAsynchronousMotor"));
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(9);
-        columns[0].name = "JobID";
-        columns[0].tdType = td::int4;
-        columns[0].len = 0;
+    columns.reserve(9);
+    columns[0].name = "JobID";
+    columns[0].tdType = td::int4;
+    columns[0].len = 0;
 
-        columns[1].name = "SystemID";
-        columns[1].tdType = td::int4;
-        columns[1].len = 0;
+    columns[1].name = "SystemID";
+    columns[1].tdType = td::int4;
+    columns[1].len = 0;
 
-        columns[2].name = "Id";
-        columns[2].tdType = td::int4;
-        columns[2].len = 0;
+    columns[2].name = "Id";
+    columns[2].tdType = td::int4;
+    columns[2].len = 0;
 
-        columns[3].name = "Name";
-        columns[3].tdType = td::nch;
-        columns[3].len = 64;
+    columns[3].name = "Name";
+    columns[3].tdType = td::nch;
+    columns[3].len = 64;
 
-        columns[4].name = "AliasName";
-        columns[4].tdType = td::nch;
-        columns[4].len = 32;
+    columns[4].name = "AliasName";
+    columns[4].tdType = td::nch;
+    columns[4].len = 32;
 
-        columns[5].name = "Description";
-        columns[5].tdType = td::nch;
-        columns[5].len = 512;
+    columns[5].name = "Description";
+    columns[5].tdType = td::nch;
+    columns[5].len = 512;
 
-        columns[6].name = "idPhaseCode";
-        columns[6].tdType = td::int4;
-        columns[6].len = 0;
+    columns[6].name = "idPhaseCode";
+    columns[6].tdType = td::int4;
+    columns[6].len = 0;
 
-        columns[7].name = "idCatalogType";
-        columns[7].tdType = td::int4;
-        columns[7].len = 0;
+    columns[7].name = "idCatalogType";
+    columns[7].tdType = td::int4;
+    columns[7].len = 0;
 
-        columns[8].name = "idConnectionType";
-        columns[8].tdType = td::int4;
-        columns[8].len = 0;
+    columns[8].name = "idConnectionType";
+    columns[8].tdType = td::int4;
+    columns[8].len = 0;
 
-        db::Recordset* rs = new db::Recordset(columns);
+    db::Recordset* rs = new db::Recordset(columns);
 
-        if (!rs->load(pStat.getPtr()))
-            return false;
+    if (!rs->load(pStat.getPtr()))
+        return false;
 
-        // true for stripes
-        MyModel *model = new MyModel(this, rs, true);
+    // true for stripes
+    MyModel *model = new MyModel(this, rs, true);
 
-        setModel(1, model);
+    setModel(1, model);
 
-        chs=4;
-        return true;
+    chs=4;
+    return true;
 }
 
 bool searchDialog::select_searchUnitPla()
@@ -514,46 +544,46 @@ bool searchDialog::select_searchShuntRes()
     mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID, SystemID, ID, Name, AliasName, Description, idCatalogType from PlacResistor"));
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(7);
-        columns[0].name = "JobID";
-        columns[0].tdType = td::int4;
-        columns[0].len = 0;
+    columns.reserve(7);
+    columns[0].name = "JobID";
+    columns[0].tdType = td::int4;
+    columns[0].len = 0;
 
-        columns[1].name = "SystemID";
-        columns[1].tdType = td::int4;
-        columns[1].len = 0;
+    columns[1].name = "SystemID";
+    columns[1].tdType = td::int4;
+    columns[1].len = 0;
 
-        columns[2].name = "Id";
-        columns[2].tdType = td::int4;
-        columns[2].len = 0;
+    columns[2].name = "Id";
+    columns[2].tdType = td::int4;
+    columns[2].len = 0;
 
-        columns[3].name = "Name";
-        columns[3].tdType = td::nch;
-        columns[3].len = 64;
+    columns[3].name = "Name";
+    columns[3].tdType = td::nch;
+    columns[3].len = 64;
 
-        columns[4].name = "AliasName";
-        columns[4].tdType = td::nch;
-        columns[4].len = 32;
+    columns[4].name = "AliasName";
+    columns[4].tdType = td::nch;
+    columns[4].len = 32;
 
-        columns[5].name = "Description";
-        columns[5].tdType = td::nch;
-        columns[5].len = 512;
+    columns[5].name = "Description";
+    columns[5].tdType = td::nch;
+    columns[5].len = 512;
 
-        columns[6].name = "idCatalogType";
-        columns[6].tdType = td::int4;
-        columns[6].len = 0;
+    columns[6].name = "idCatalogType";
+    columns[6].tdType = td::int4;
+    columns[6].len = 0;
 
-        db::Recordset* rs = new db::Recordset(columns);
+    db::Recordset* rs = new db::Recordset(columns);
 
-        if (!rs->load(pStat.getPtr()))
-            return false;
+    if (!rs->load(pStat.getPtr()))
+        return false;
 
-        // true for stripes
-        MyModel *model = new MyModel(this, rs, true);
+    // true for stripes
+    MyModel *model = new MyModel(this, rs, true);
 
-        setModel(1, model);
-        chs=6;
-        return true;
+    setModel(1, model);
+    chs=6;
+    return true;
 }
 
 //----------------------------------------------------SELECT COMBOBOX-----------------------------------
@@ -864,7 +894,7 @@ int searchDialog::select_catJobID(int id)
     int jobID;
     td::INT4 insert_id(id);
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID from JobCatalogs WHERE CatID=?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT JobID from JobCatalogs WHERE JobID=?"));
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
@@ -1035,14 +1065,17 @@ bool searchDialog::insert_consumer(int jobID, int typeID, int prodID, int id, QS
     float insert_kp2 = kp2;
     float insert_kq2 = kq2;
 
+    td::INT4 insert_edit(1);
+
     insert_catalog(typeID, prodID, id, name);
+    //update_catalog(name);
     insert_jobCatalog(jobID, typeID, id, name);
 
     //start transaction log
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatEnergyConsumer(JobID, TypeID, ProducerID, ID, Name, AliasName, Description, idRatedVoltage, kp0, kq0, kp1, kq1, kp2, kq2) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatEnergyConsumer(JobID, TypeID, ProducerID, ID, Name, AliasName, Description, idRatedVoltage, kp0, kq0, kp1, kq1, kp2, kq2, EditFlag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"));
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
@@ -1056,7 +1089,8 @@ bool searchDialog::insert_consumer(int jobID, int typeID, int prodID, int id, QS
            << insert_kp1
            << insert_kq1
            << insert_kp2
-           << insert_kq2;
+           << insert_kq2
+           << insert_edit;
 
     if (!pStat->execute())
     {
@@ -1198,7 +1232,7 @@ bool searchDialog::insert_unit(int jobID, int typeID, int prodID, int id, QStrin
 }
 
 bool searchDialog::insert_motor(int jobID, int typeID, int prodID, int id, QString name, QString aliasName, QString description, int idRatedVol
-                      , int idNoP, float nmp, float pow, float eff, float load, int rpm, float isu, float rx)
+                                , int idNoP, float nmp, float pow, float eff, float load, int rpm, float isu, float rx)
 {
     if (!pDB)
         return false;
@@ -1342,8 +1376,8 @@ bool searchDialog::insert_motorPla(int systemId, int jobID, int typeID, int prod
 }
 
 bool searchDialog::insert_unitPlacement(int systemID, int jobID, int typeID, int prodID, int id, QString name, QString aliasName, QString description
-                      , int phaseCode, int catalogType, int nodeType, int loadType, int loadDemand
-                      , float des, int grounded, float r, float x)
+                                        , int phaseCode, int catalogType, int nodeType, int loadType, int loadDemand
+                                        , float des, int grounded, float r, float x)
 {
     if (!pDB)
         return false;
@@ -1424,50 +1458,50 @@ bool searchDialog::insert_unitPlacement(int systemID, int jobID, int typeID, int
 
 bool searchDialog::insert_shuntResistor(int systemID, int jobID, int typeID, int prodID, int id, QString name, QString aliasName
                                         , QString description, int idCatType)
-    {
-        if (!pDB)
-            return false;
+{
+    if (!pDB)
+        return false;
 
-        td::INT4 insert_systemID(systemID);
-        td::INT4 insert_job(jobID);
-        td::INT4 insert_type(typeID);
-        td::INT4 insert_prod(prodID);
+    td::INT4 insert_systemID(systemID);
+    td::INT4 insert_job(jobID);
+    td::INT4 insert_type(typeID);
+    td::INT4 insert_prod(prodID);
 
-        td::INT4 insert_id(id);
+    td::INT4 insert_id(id);
 
-        db::Ref<td::String> refName(64);
-        db::Ref<td::String> refAliasName(32);
-        db::Ref<td::String> refDescription(512);
+    db::Ref<td::String> refName(64);
+    db::Ref<td::String> refAliasName(32);
+    db::Ref<td::String> refDescription(512);
 
-        td::String td_name = name.toUtf8();
-        td::String td_aliasName = aliasName.toUtf8();
-        td::String td_description = description.toUtf8();
+    td::String td_name = name.toUtf8();
+    td::String td_aliasName = aliasName.toUtf8();
+    td::String td_description = description.toUtf8();
 
-        refName = td_name;
-        refAliasName = td_aliasName;
-        refDescription = td_description;
+    refName = td_name;
+    refAliasName = td_aliasName;
+    refDescription = td_description;
 
-        td::INT4 insert_idCatType(idCatType);
+    td::INT4 insert_idCatType(idCatType);
 
-        insert_placement(systemID, typeID, prodID, id, name);
-        insert_jobPlacement(systemID, jobID, typeID, id, name);
+    insert_placement(systemID, typeID, prodID, id, name);
+    insert_jobPlacement(systemID, jobID, typeID, id, name);
 
-        //start transaction log
-        db::Transaction trans(pDB);
+    //start transaction log
+    db::Transaction trans(pDB);
 
-        //create statement using parameters which will be provided later
-        db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO PlacResistor(SystemID, JobID, TypeID, ProducerID, ID, Name, AliasName, Description, idCatalogType) VALUES (?,?,?,?,?,?,?,?,?)"));
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO PlacResistor(SystemID, JobID, TypeID, ProducerID, ID, Name, AliasName, Description, idCatalogType) VALUES (?,?,?,?,?,?,?,?,?)"));
 
-        //allocate parameters and bind them to the statement
-        db::Params params(pStat->allocParams());
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
 
-        //bind params
-        params << insert_systemID << insert_job << insert_type << insert_prod
-               << insert_id
-               << refName
-               << refAliasName
-               << refDescription
-               << insert_idCatType;
+    //bind params
+    params << insert_systemID << insert_job << insert_type << insert_prod
+           << insert_id
+           << refName
+           << refAliasName
+           << refDescription
+           << insert_idCatType;
 
     if (!pStat->execute())
     {
@@ -1599,7 +1633,7 @@ bool searchDialog::insert_jobCatalog(int jobID, int typeID, int catID, QString c
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
 
-    //bind params
+    //bind parameters
     params << insert_jobID << insert_type << insert_catID << refName;
 
     if (!pStat->execute())
@@ -1669,14 +1703,13 @@ bool searchDialog::insert_jobPlacement(int systemID, int jobID, int typeID, int 
 
 //-----------------------------------------------UPDATE STATEMENTS-------------------------------------
 bool searchDialog::updateConsumer(QString name, QString aliasName, QString description, int ratedVol
-                                   , float kp0, float kq0, float kp1, float kq1, float kp2, float kq2)
+                                  , float kp0, float kq0, float kp1, float kq1, float kp2, float kq2)
 {
 
     if (!pDB)
         return false;
 
     int id = val.toInt();
-
     td::INT4 insert_id(id);
     db::Ref<td::String> refName(64);
     db::Ref<td::String> refAliasName(32);
@@ -1699,7 +1732,7 @@ bool searchDialog::updateConsumer(QString name, QString aliasName, QString descr
     float insert_kq2 = kq2;
 
     update_catalog(name);
-    update_jobCatalog(name);
+    update_jobCatalog(0, name);
 
     //start transaction log
     db::Transaction trans(pDB);
@@ -1743,11 +1776,11 @@ bool searchDialog::updateConsumer(QString name, QString aliasName, QString descr
 }
 
 bool searchDialog::updateUnit(QString name, QString aliasName, QString description, int ratedVol, int ratedPow
-                      , int idNoP, int idConType, float minOpAcPow, float maxOpAcPow, float minOpRPow, float maxOpRPow
-                      , float Z0_re, float Z0_im, float Z1_re, float Z1_im, float Z2_re , float Z2_im
-                      , float Z0trans_re, float Z0trans_im, float Z1trans_re, float Z1trans_im
-                      , float Z2trans_re, float Z2trans_im, float Z0sub_re, float Z0sub_im
-                      , float Z1sub_re, float Z1sub_im, float Z2sub_re, float Z2sub_im)
+                              , int idNoP, int idConType, float minOpAcPow, float maxOpAcPow, float minOpRPow, float maxOpRPow
+                              , float Z0_re, float Z0_im, float Z1_re, float Z1_im, float Z2_re , float Z2_im
+                              , float Z0trans_re, float Z0trans_im, float Z1trans_re, float Z1trans_im
+                              , float Z2trans_re, float Z2trans_im, float Z0sub_re, float Z0sub_im
+                              , float Z1sub_re, float Z1sub_im, float Z2sub_re, float Z2sub_im)
 {
     if (!pDB)
         return false;
@@ -1795,7 +1828,7 @@ bool searchDialog::updateUnit(QString name, QString aliasName, QString descripti
     float insert_Z2sub_im =  Z2sub_im;
 
     update_catalog(name);
-    update_jobCatalog(name);
+    update_jobCatalog(0, name);
 
     //start transaction log
     db::Transaction trans(pDB);
@@ -1858,7 +1891,7 @@ bool searchDialog::updateUnit(QString name, QString aliasName, QString descripti
 }
 
 bool searchDialog::updateMotor(QString name, QString aliasName, QString description, int idRatedVol
-                            , int idNoP, float nmp, float pow, float eff, float load, int rpm, float isu, float rx)
+                               , int idNoP, float nmp, float pow, float eff, float load, int rpm, float isu, float rx)
 {
     if (!pDB)
         return false;
@@ -1889,7 +1922,7 @@ bool searchDialog::updateMotor(QString name, QString aliasName, QString descript
     float insert_rx=rx;
 
     update_catalog(name);
-    update_jobCatalog(name);
+    update_jobCatalog(0, name);
 
     //start transaction log
     db::Transaction trans(pDB);
@@ -1994,8 +2027,8 @@ bool searchDialog::updateMotorPla(int systemId, QString name, QString alias, QSt
 }
 
 bool searchDialog::updateUnitPlacement(int systemID, QString name, QString aliasName, QString description
-                               , int phaseCode, int catalogType, int nodeType, int loadType, int loadDemand
-                               , float des, int grounded, float r, float x)
+                                       , int phaseCode, int catalogType, int nodeType, int loadType, int loadDemand
+                                       , float des, int grounded, float r, float x)
 {
     if (!pDB)
         return false;
@@ -2072,7 +2105,7 @@ bool searchDialog::updateUnitPlacement(int systemID, QString name, QString alias
 }
 
 bool searchDialog::updateShuntResistor(int systemID, QString name, QString aliasName
-                                        , QString description, int idCatType)
+                                       , QString description, int idCatType)
 {
     if (!pDB)
         return false;
@@ -2101,13 +2134,13 @@ bool searchDialog::updateShuntResistor(int systemID, QString name, QString alias
     //start transaction log
     db::Transaction trans(pDB);
 
-        //create statement using parameters which will be provided later
+    //create statement using parameters which will be provided later
     db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE PlacResistor SET SystemID=?, Name=?, AliasName=?, Description=?, idCatalogType=? WHERE ID=?"));
 
-        //allocate parameters and bind them to the statement
+    //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
 
-        //bind params
+    //bind params
     params << insert_systemID
            << refName
            << refAliasName
@@ -2232,12 +2265,15 @@ bool searchDialog::update_placement(int systemID, QString name)
     return bRet;
 }
 
-bool searchDialog::update_jobCatalog(QString catName)
+bool searchDialog::update_jobCatalog(int jobId, QString catName)
 {
     if (!pDB)
         return false;
 
+    int jobId2 = jobId;
     int id = val.toInt();
+
+    td::INT4 insert_job(jobId2);
     td::INT4 insert_id(id);
 
     db::Ref<td::String> refoldName(64);
@@ -2252,13 +2288,13 @@ bool searchDialog::update_jobCatalog(QString catName)
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE JobCatalogs SET CatName=? WHERE CatID=? AND CatName=?"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE JobCatalogs SET JobID=?, CatName=? WHERE CatID=? AND CatName=?"));
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
 
     //bind params
-    params << refName << insert_id << refoldName;
+    params << insert_job << refName << insert_id << refoldName;
 
     if (!pStat->execute())
     {
@@ -2274,6 +2310,48 @@ bool searchDialog::update_jobCatalog(QString catName)
     bool  bRet = trans.commit();
     if (bRet)
         std::cout << "Data updated JobCatalog" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::update_jobCatalogJobID(int oldJobID, int newJobID)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = oldJobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int newJobId = newJobID;
+    td::INT4 insert_newJobID(newJobId);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE JobCatalogs SET JobID=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newJobID << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
 
     if (DebugTrace(1000))
         mu::getTracer() << "Insert finished!\n";
@@ -2308,6 +2386,390 @@ bool searchDialog::update_jobPlacement(int systemID, QString catName)
 
     //bind params
     params << insert_system << refName << insert_id << refoldName;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::update_consJobIdEditFlag(int oldJobID, int newJobID)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = oldJobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int newJobId = newJobID;
+    td::INT4 insert_newJobID(newJobId);
+    td::INT4 insert_editFlag(0);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatEnergyConsumer SET JobID=?, EditFlag=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newJobID << insert_editFlag << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::updateConsEditFlag(int jobID, int EditFlag)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = jobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int editFlag = EditFlag;
+    td::INT4 insert_editFlag(editFlag);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatEnergyConsumer SET EditFlag=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_editFlag << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::updateConsEditFlagAfterAct(int oldEditFlag, int newEditFlag)
+{
+    if (!pDB)
+        return false;
+
+    int oldEditFlag2 = oldEditFlag;
+    td::INT4 insert_oldEditFlag(oldEditFlag2);
+
+    int newEditFlag2 = newEditFlag;
+    td::INT4 insert_newEditFlag(newEditFlag2);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatEnergyConsumer SET EditFlag=? WHERE EditFlag=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newEditFlag << insert_oldEditFlag;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::update_unitJobIdEditFlag(int oldJobID, int newJobID)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = oldJobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int newJobId = newJobID;
+    td::INT4 insert_newJobID(newJobId);
+    td::INT4 insert_editFlag(0);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatGeneratingUnit SET JobID=?, EditFlag=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newJobID << insert_editFlag << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::updateUnitEditFlag(int jobID, int EditFlag)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = jobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int editFlag = EditFlag;
+    td::INT4 insert_editFlag(editFlag);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatGeneratingUnit SET EditFlag=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_editFlag << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::updateUnitEditFlagAfterAct(int oldEditFlag, int newEditFlag)
+{
+    if (!pDB)
+        return false;
+
+    int oldEditFlag2 = oldEditFlag;
+    td::INT4 insert_oldEditFlag(oldEditFlag2);
+
+    int newEditFlag2 = newEditFlag;
+    td::INT4 insert_newEditFlag(newEditFlag2);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatGeneratingUnit SET EditFlag=? WHERE EditFlag=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newEditFlag << insert_oldEditFlag;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::update_motorJobIdEditFlag(int oldJobID, int newJobID)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = oldJobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int newJobId = newJobID;
+    td::INT4 insert_newJobID(newJobId);
+    td::INT4 insert_editFlag(0);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatAsynchronousMotor SET JobID=?, EditFlag=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newJobID << insert_editFlag << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::updateMotorEditFlag(int jobID, int EditFlag)
+{
+    if (!pDB)
+        return false;
+
+    int oldJobId = jobID;
+    td::INT4 insert_oldJobID(oldJobId);
+    int editFlag = EditFlag;
+    td::INT4 insert_editFlag(editFlag);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatAsynchronousMotor SET EditFlag=? WHERE JobID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_editFlag << insert_oldJobID;
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated JobPlacement" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchDialog::updateMotorEditFlagAfterAct(int oldEditFlag, int newEditFlag)
+{
+    if (!pDB)
+        return false;
+
+    int oldEditFlag2 = oldEditFlag;
+    td::INT4 insert_oldEditFlag(oldEditFlag2);
+
+    int newEditFlag2 = newEditFlag;
+    td::INT4 insert_newEditFlag(newEditFlag2);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE CatAsynchronousMotor SET EditFlag=? WHERE EditFlag=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newEditFlag << insert_oldEditFlag;
 
     if (!pStat->execute())
     {
@@ -2705,62 +3167,62 @@ bool searchDialog::setMotorValues()
     params << insert_id;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(14);
-        columns[0].name = "Id";
-        columns[0].tdType = td::int4;
-        columns[0].len = 0;
+    columns.reserve(14);
+    columns[0].name = "Id";
+    columns[0].tdType = td::int4;
+    columns[0].len = 0;
 
-        columns[1].name = "Name";
-        columns[1].tdType = td::nch;
-        columns[1].len = 128;
+    columns[1].name = "Name";
+    columns[1].tdType = td::nch;
+    columns[1].len = 128;
 
-        columns[2].name = "AliasName";
-        columns[2].tdType = td::nch;
-        columns[2].len = 32;
+    columns[2].name = "AliasName";
+    columns[2].tdType = td::nch;
+    columns[2].len = 32;
 
-        columns[3].name = "Description";
-        columns[3].tdType = td::nch;
-        columns[3].len = 512;
+    columns[3].name = "Description";
+    columns[3].tdType = td::nch;
+    columns[3].len = 512;
 
-        columns[4].name = "idNumberOfPhases";
-        columns[4].tdType = td::int4;
-        columns[4].len = 0;
+    columns[4].name = "idNumberOfPhases";
+    columns[4].tdType = td::int4;
+    columns[4].len = 0;
 
-        columns[5].name = "idRatedVoltage";
-        columns[5].tdType = td::int4;
-        columns[5].len = 0;
+    columns[5].name = "idRatedVoltage";
+    columns[5].tdType = td::int4;
+    columns[5].len = 0;
 
-        columns[6].name = "nomMechPow";
-        columns[6].tdType = td::real8;
-        columns[6].len = 0;
+    columns[6].name = "nomMechPow";
+    columns[6].tdType = td::real8;
+    columns[6].len = 0;
 
-        columns[7].name = "powerFactor";
-        columns[7].tdType = td::real8;
-        columns[7].len = 0;
+    columns[7].name = "powerFactor";
+    columns[7].tdType = td::real8;
+    columns[7].len = 0;
 
-        columns[8].name = "efficiency";
-        columns[8].tdType = td::real8;
-        columns[8].len = 0;
+    columns[8].name = "efficiency";
+    columns[8].tdType = td::real8;
+    columns[8].len = 0;
 
-        columns[9].name = "loadFactor";
-        columns[9].tdType = td::real8;
-        columns[9].len = 0;
+    columns[9].name = "loadFactor";
+    columns[9].tdType = td::real8;
+    columns[9].len = 0;
 
-        columns[10].name = "rpm";
-        columns[10].tdType = td::int4;
-        columns[10].len = 0;
+    columns[10].name = "rpm";
+    columns[10].tdType = td::int4;
+    columns[10].len = 0;
 
-        columns[11].name = "Isu_In";
-        columns[11].tdType = td::real8;
-        columns[11].len = 0;
+    columns[11].name = "Isu_In";
+    columns[11].tdType = td::real8;
+    columns[11].len = 0;
 
-        columns[12].name = "r_x";
-        columns[12].tdType = td::real8;
-        columns[12].len = 0;
+    columns[12].name = "r_x";
+    columns[12].tdType = td::real8;
+    columns[12].len = 0;
 
-        columns[13].name = "ProducerID";
-        columns[13].tdType = td::int4;
-        columns[13].len = 0;
+    columns[13].name = "ProducerID";
+    columns[13].tdType = td::int4;
+    columns[13].len = 0;
 
     db::Recordset* rs = new db::Recordset(columns);
 
@@ -2830,42 +3292,42 @@ bool searchDialog::setMotorPlaValues()
     params << insert_id;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(9);
-        columns[0].name = "SystemID";
-        columns[0].tdType = td::int4;
-        columns[0].len = 0;
+    columns.reserve(9);
+    columns[0].name = "SystemID";
+    columns[0].tdType = td::int4;
+    columns[0].len = 0;
 
-        columns[1].name = "Id";
-        columns[1].tdType = td::int4;
-        columns[1].len = 0;
+    columns[1].name = "Id";
+    columns[1].tdType = td::int4;
+    columns[1].len = 0;
 
-        columns[2].name = "Name";
-        columns[2].tdType = td::nch;
-        columns[2].len = 64;
+    columns[2].name = "Name";
+    columns[2].tdType = td::nch;
+    columns[2].len = 64;
 
-        columns[3].name = "AliasName";
-        columns[3].tdType = td::nch;
-        columns[3].len = 32;
+    columns[3].name = "AliasName";
+    columns[3].tdType = td::nch;
+    columns[3].len = 32;
 
-        columns[4].name = "Description";
-        columns[4].tdType = td::nch;
-        columns[4].len = 512;
+    columns[4].name = "Description";
+    columns[4].tdType = td::nch;
+    columns[4].len = 512;
 
-        columns[5].name = "idPhaseCode";
-        columns[5].tdType = td::int4;
-        columns[5].len = 0;
+    columns[5].name = "idPhaseCode";
+    columns[5].tdType = td::int4;
+    columns[5].len = 0;
 
-        columns[6].name = "idCatalogType";
-        columns[6].tdType = td::int4;
-        columns[6].len = 0;
+    columns[6].name = "idCatalogType";
+    columns[6].tdType = td::int4;
+    columns[6].len = 0;
 
-        columns[7].name = "idConnectionType";
-        columns[7].tdType = td::int4;
-        columns[7].len = 0;
+    columns[7].name = "idConnectionType";
+    columns[7].tdType = td::int4;
+    columns[7].len = 0;
 
-        columns[8].name = "ProducerID";
-        columns[8].tdType = td::int4;
-        columns[8].len = 0;
+    columns[8].name = "ProducerID";
+    columns[8].tdType = td::int4;
+    columns[8].len = 0;
 
     db::Recordset* rs = new db::Recordset(columns);
 
@@ -3054,34 +3516,34 @@ bool searchDialog::setResPlaValues()
     params << insert_id;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(7);
-        columns[0].name = "SystemID";
-        columns[0].tdType = td::int4;
-        columns[0].len = 0;
+    columns.reserve(7);
+    columns[0].name = "SystemID";
+    columns[0].tdType = td::int4;
+    columns[0].len = 0;
 
-        columns[1].name = "Id";
-        columns[1].tdType = td::int4;
-        columns[1].len = 0;
+    columns[1].name = "Id";
+    columns[1].tdType = td::int4;
+    columns[1].len = 0;
 
-        columns[2].name = "Name";
-        columns[2].tdType = td::nch;
-        columns[2].len = 64;
+    columns[2].name = "Name";
+    columns[2].tdType = td::nch;
+    columns[2].len = 64;
 
-        columns[3].name = "AliasName";
-        columns[3].tdType = td::nch;
-        columns[3].len = 32;
+    columns[3].name = "AliasName";
+    columns[3].tdType = td::nch;
+    columns[3].len = 32;
 
-        columns[4].name = "Description";
-        columns[4].tdType = td::nch;
-        columns[4].len = 512;
+    columns[4].name = "Description";
+    columns[4].tdType = td::nch;
+    columns[4].len = 512;
 
-        columns[5].name = "idCatalogType";
-        columns[5].tdType = td::int4;
-        columns[5].len = 0;
+    columns[5].name = "idCatalogType";
+    columns[5].tdType = td::int4;
+    columns[5].len = 0;
 
-        columns[6].name = "ProducerID";
-        columns[6].tdType = td::int4;
-        columns[6].len = 0;
+    columns[6].name = "ProducerID";
+    columns[6].tdType = td::int4;
+    columns[6].len = 0;
 
     db::Recordset* rs = new db::Recordset(columns);
 
@@ -3120,64 +3582,58 @@ void searchDialog::setModel(int i, MyModel *n)
 
     if(i == 0)
     {
-    proxy->setSourceModel(n);
-    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    proxy->setFilterKeyColumn(2);
+        proxy->setSourceModel(n);
+        proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        proxy->setFilterKeyColumn(2);
 
-    ui->tableView->setModel(proxy);
-    ui->tableView->resizeRowsToContents();
-    ui->tableView->horizontalHeader()->setStretchLastSection(true);
+        ui->tableView->setModel(proxy);
+        ui->tableView->resizeRowsToContents();
+        ui->tableView->horizontalHeader()->setStretchLastSection(true);
     }
 
     else
     {
-    proxy->setSourceModel(n);
-    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    proxy->setFilterKeyColumn(3);
+        proxy->setSourceModel(n);
+        proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        proxy->setFilterKeyColumn(3);
 
-    ui->tableView->setModel(proxy);
-    ui->tableView->resizeRowsToContents();
-    ui->tableView->horizontalHeader()->setStretchLastSection(true);
+        ui->tableView->setModel(proxy);
+        ui->tableView->resizeRowsToContents();
+        ui->tableView->horizontalHeader()->setStretchLastSection(true);
     }
 }
 
 void searchDialog::on_newPushButton_clicked()
 {
-    selectJob jobDlg (this);
-    jobDlg.show();
 
-    if (jobDlg.exec() == QDialog::Accepted)
+    if(chs == 1)
     {
+        catConsClicked(refJob2);
+    }
 
-        if(chs == 1)
-        {
-            catConsClicked(jobDlg.returnJobID());
-        }
+    else if(chs==2)
+    {
+        catUnitClicked(refJob2);
+    }
 
-        else if(chs==2)
-        {
-            catUnitClicked(jobDlg.returnJobID());
-        }
+    else if(chs == 3)
+    {
+        catMotorClicked(refJob2);
+    }
 
-        else if(chs == 3)
-        {
-            catMotorClicked(jobDlg.returnJobID());
-        }
+    else if(chs == 4)
+    {
+        plaMotorClicked(refJob2);
+    }
 
-        else if(chs == 4)
-        {
-            plaMotorClicked(jobDlg.returnJobID());
-        }
+    else if(chs == 5)
+    {
+        plaUnitClicked(refJob2);
+    }
 
-        else if(chs == 5)
-        {
-            plaUnitClicked(jobDlg.returnJobID());
-        }
-
-        else if(chs == 6)
-        {
-            plaResistorClicked(jobDlg.returnJobID());
-        }
+    else if(chs == 6)
+    {
+        plaResistorClicked(refJob2);
     }
 }
 
@@ -3186,25 +3642,27 @@ void searchDialog::catConsClicked(int jobID)
     bool exst = false;
 
     catConsumer catCons(this);
-    catCons.setJobID(jobID);
-    catCons.setProducer(select_producers(), 0);
-    catCons.setID(0);
-    catCons.setName("Energy Consumer Catalog");
-    catCons.setAliasName("eCons");
-    catCons.setRatedVoltage(select_ratedVoltage(), 0);
-    catCons.setKP0(0);
-    catCons.setKQ0(0);
-    catCons.setKP1(0);
-    catCons.setKQ1(0);
-    catCons.setKP2(0);
-    catCons.setKQ2(0);
-    catCons.setDescription("This is an Energy Consumer Catalog");
+    if(preJob == 0)
+        preJob = jobID;
+        catCons.setJobID(preJob);
+        catCons.setProducer(select_producers(), 0, 1);
+        catCons.setID(0);
+        catCons.setName("Energy Consumer Catalog", 1);
+        catCons.setAliasName("eCons", 1);
+        catCons.setRatedVoltage(select_ratedVoltage(), 0, 1);
+        catCons.setKP0(0, 1);
+        catCons.setKQ0(0, 1);
+        catCons.setKP1(0, 1);
+        catCons.setKQ1(0, 1);
+        catCons.setKP2(0, 1);
+        catCons.setKQ2(0, 1);
+        catCons.setDescription("This is an Energy Consumer Catalog", 1);
 
     if (catCons.exec() == QDialog::Accepted)
     {
 
         for(int i=0; i < ui->tableView->model()->rowCount(); i++)
-        {     
+        {
             QModelIndex ind = ui->tableView->model()->index(i,1);
             ui->tableView->selectionModel()->select(ind, QItemSelectionModel::Select);
             int val2 = ui->tableView->model()->data(ind).toInt();
@@ -3217,21 +3675,28 @@ void searchDialog::catConsClicked(int jobID)
 
         if(exst == false)
         {
-          insert_consumer(jobID
-                        , catCons.typeID()
-                        , select_prodID(catCons.prodName())
-                        , catCons.id()
-                        , catCons.name()
-                        , catCons.aliasName()
-                        , catCons.description()
-                        , catCons.idRatedVol()
-                        , catCons.kP0()
-                        , catCons.kQ0()
-                        , catCons.kP1()
-                        , catCons.kQ1()
-                        , catCons.kP2()
-                        , catCons.kQ2());
-          select_searchConsumer();
+            //int randJ = updateRandomNumber().toInt();
+            insert_consumer(preJob
+                            , catCons.typeID()
+                            , select_prodID(catCons.prodName())
+                            , catCons.id()
+                            , catCons.name()
+                            , catCons.aliasName()
+                            , catCons.description()
+                            , catCons.idRatedVol()
+                            , catCons.kP0()
+                            , catCons.kQ0()
+                            , catCons.kP1()
+                            , catCons.kQ1()
+                            , catCons.kP2()
+                            , catCons.kQ2());
+
+            //searchJobs nj(this);
+            //nj.insert_job(randJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            //nj.update_job(preJob, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), randJ);
+            //preJob = randJ;
+
+            select_searchConsumer();
         }
 
         if(exst == true)
@@ -3242,32 +3707,46 @@ void searchDialog::catConsClicked(int jobID)
         }
         else
         {
-            messageBox exist(2,this);
-            exist.show();
-            exist.exec();
+            if(checkBox == false)
+            {
+                messageBox exist(2,this);
+                exist.show();
+                if(exist.exec() == QDialog::Accepted)
+                {
+                    if(exist.checkBox == true)
+                    checkBox = true;
+                }
+            }
         }
 
-       }
+    }
 
-    else
+    /*else
     {
         if(exst == false)
         {
-        insert_consumer(jobID
-                      , catCons.typeID()
-                      , 1
-                      , catCons.id()
-                      , catCons.name()
-                      , catCons.aliasName()
-                      , catCons.description()
-                      , catCons.idRatedVol()
-                      , catCons.kP0()
-                      , catCons.kQ0()
-                      , catCons.kP1()
-                      , catCons.kQ1()
-                      , catCons.kP2()
-                      , catCons.kQ2());
+            insert_consumer(jobID
+                            , catCons.typeID()
+                            , 1
+                            , catCons.id()
+                            , catCons.name()
+                            , catCons.aliasName()
+                            , catCons.description()
+                            , catCons.idRatedVol()
+                            , catCons.kP0()
+                            , catCons.kQ0()
+                            , catCons.kP1()
+                            , catCons.kQ1()
+                            , catCons.kP2()
+                            , catCons.kQ2());
+            select_searchConsumer();
         }
+    }*/
+
+    int lastItem = ui->tableView->model()->rowCount();
+    if(lastItem >= 1)
+    {
+        ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));
     }
 
 }
@@ -3277,38 +3756,40 @@ void searchDialog::catUnitClicked(int jobID)
     bool exst = false;
 
     catUnit unitCatalog(this);
+    if(preJob == 0)
+        preJob = jobID;
     unitCatalog.setJobID(jobID);
-    unitCatalog.setProducer(select_producers(), 0);
+    unitCatalog.setProducer(select_producers(), 0, 1);
     unitCatalog.setID(0);
-    unitCatalog.setName("Generating Unit Catalog");
-    unitCatalog.setAliasName("gUnitCat");
-    unitCatalog.setRatedVoltage(select_ratedVoltage(), 0);
-    unitCatalog.setRatedPower(select_ratedPower(), 0);
-    unitCatalog.setNumberOfPhases(select_numberOfPhases(), 0);
-    unitCatalog.setConnectionType(select_connectionType(), 0);
-    unitCatalog.setminOpAcPow(0);
-    unitCatalog.setmaxOpAcPow(0);
-    unitCatalog.setminOpRPow(0);
-    unitCatalog.setmaxOpRPow(0);
-    unitCatalog.setZ0_re(0);
-    unitCatalog.setZ0_im(0);
-    unitCatalog.setZ1_re(0);
-    unitCatalog.setZ1_im(0);
-    unitCatalog.setZ2_re(0);
-    unitCatalog.setZ2_im(0);
-    unitCatalog.setZ0trans_re(0);
-    unitCatalog.setZ0trans_im(0);
-    unitCatalog.setZ1trans_re(0);
-    unitCatalog.setZ1trans_im(0);
-    unitCatalog.setZ2trans_re(0);
-    unitCatalog.setZ2trans_im(0);
-    unitCatalog.setZ0sub_re(0);
-    unitCatalog.setZ0sub_im(0);
-    unitCatalog.setZ1sub_re(0);
-    unitCatalog.setZ1sub_im(0);
-    unitCatalog.setZ2sub_re(0);
-    unitCatalog.setZ2sub_im(0);
-    unitCatalog.setDescription("This is a Generating Unit Catalog");
+    unitCatalog.setName("Generating Unit Catalog", 1);
+    unitCatalog.setAliasName("gUnitCat", 1);
+    unitCatalog.setRatedVoltage(select_ratedVoltage(), 0, 1);
+    unitCatalog.setRatedPower(select_ratedPower(), 0, 1);
+    unitCatalog.setNumberOfPhases(select_numberOfPhases(), 0, 1);
+    unitCatalog.setConnectionType(select_connectionType(), 0, 1);
+    unitCatalog.setminOpAcPow(0, 1);
+    unitCatalog.setmaxOpAcPow(0, 1);
+    unitCatalog.setminOpRPow(0, 1);
+    unitCatalog.setmaxOpRPow(0, 1);
+    unitCatalog.setZ0_re(0, 1);
+    unitCatalog.setZ0_im(0, 1);
+    unitCatalog.setZ1_re(0, 1);
+    unitCatalog.setZ1_im(0, 1);
+    unitCatalog.setZ2_re(0, 1);
+    unitCatalog.setZ2_im(0, 1);
+    unitCatalog.setZ0trans_re(0, 1);
+    unitCatalog.setZ0trans_im(0, 1);
+    unitCatalog.setZ1trans_re(0, 1);
+    unitCatalog.setZ1trans_im(0, 1);
+    unitCatalog.setZ2trans_re(0, 1);
+    unitCatalog.setZ2trans_im(0, 1);
+    unitCatalog.setZ0sub_re(0, 1);
+    unitCatalog.setZ0sub_im(0, 1);
+    unitCatalog.setZ1sub_re(0, 1);
+    unitCatalog.setZ1sub_im(0, 1);
+    unitCatalog.setZ2sub_re(0, 1);
+    unitCatalog.setZ2sub_im(0, 1);
+    unitCatalog.setDescription("This is a Generating Unit Catalog", 1);
 
     if (unitCatalog.exec() == QDialog::Accepted)
     {
@@ -3328,40 +3809,44 @@ void searchDialog::catUnitClicked(int jobID)
 
         if(exst == false)
         {
-        insert_unit(jobID
-                    , unitCatalog.typeID()
-                    , select_prodID(unitCatalog.prodName())
-                    , unitCatalog.id()
-                    , unitCatalog.name()
-                    , unitCatalog.aliasName()
-                    , unitCatalog.description()
-                    , unitCatalog.idRatedVol()
-                    , unitCatalog.idRatedPower()
-                    , unitCatalog.idNumberOfPhases()
-                    , unitCatalog.idConnectionType()
-                    , unitCatalog.minOpAcPow()
-                    , unitCatalog.maxOpAcPow()
-                    , unitCatalog.minOpRPow()
-                    , unitCatalog.maxOpRPow()
-                    , unitCatalog.Z0_re()
-                    , unitCatalog.Z0_im()
-                    , unitCatalog.Z1_re()
-                    , unitCatalog.Z1_im()
-                    , unitCatalog.Z2_re()
-                    , unitCatalog.Z2_im()
-                    , unitCatalog.Z0trans_re()
-                    , unitCatalog.Z0trans_im()
-                    , unitCatalog.Z1trans_re()
-                    , unitCatalog.Z1trans_im()
-                    , unitCatalog.Z2trans_re()
-                    , unitCatalog.Z2trans_im()
-                    , unitCatalog.Z0sub_re()
-                    , unitCatalog.Z0sub_im()
-                    , unitCatalog.Z1sub_re()
-                    , unitCatalog.Z1sub_im()
-                    , unitCatalog.Z2sub_re()
-                    , unitCatalog.Z2sub_im());
-        select_searchUnit();
+           // int randJ = updateRandomNumber().toInt();
+            insert_unit(preJob
+                        , unitCatalog.typeID()
+                        , select_prodID(unitCatalog.prodName())
+                        , unitCatalog.id()
+                        , unitCatalog.name()
+                        , unitCatalog.aliasName()
+                        , unitCatalog.description()
+                        , unitCatalog.idRatedVol()
+                        , unitCatalog.idRatedPower()
+                        , unitCatalog.idNumberOfPhases()
+                        , unitCatalog.idConnectionType()
+                        , unitCatalog.minOpAcPow()
+                        , unitCatalog.maxOpAcPow()
+                        , unitCatalog.minOpRPow()
+                        , unitCatalog.maxOpRPow()
+                        , unitCatalog.Z0_re()
+                        , unitCatalog.Z0_im()
+                        , unitCatalog.Z1_re()
+                        , unitCatalog.Z1_im()
+                        , unitCatalog.Z2_re()
+                        , unitCatalog.Z2_im()
+                        , unitCatalog.Z0trans_re()
+                        , unitCatalog.Z0trans_im()
+                        , unitCatalog.Z1trans_re()
+                        , unitCatalog.Z1trans_im()
+                        , unitCatalog.Z2trans_re()
+                        , unitCatalog.Z2trans_im()
+                        , unitCatalog.Z0sub_re()
+                        , unitCatalog.Z0sub_im()
+                        , unitCatalog.Z1sub_re()
+                        , unitCatalog.Z1sub_im()
+                        , unitCatalog.Z2sub_re()
+                        , unitCatalog.Z2sub_im());
+
+            //searchJobs nj(this);
+           // nj.insert_job(randJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            select_searchUnit();
         }
 
         if(exst == true)
@@ -3372,50 +3857,63 @@ void searchDialog::catUnitClicked(int jobID)
         }
         else
         {
-            messageBox exist(2,this);
-            exist.show();
-            exist.exec();
+            if(checkBox == false)
+            {
+                messageBox exist(2,this);
+                exist.show();
+                if(exist.exec() == QDialog::Accepted)
+                {
+                    if(exist.checkBox == true)
+                    checkBox = true;
+                }
+            }
         }
     }
 
-    else
+   /* else
     {
         if(exst == false)
         {
-        insert_unit(jobID
-                  , unitCatalog.typeID()
-                  , 1
-                  , unitCatalog.id()
-                  , unitCatalog.name()
-                  , unitCatalog.aliasName()
-                  , unitCatalog.description()
-                  , unitCatalog.idRatedVol()
-                  , unitCatalog.idRatedPower()
-                  , unitCatalog.idNumberOfPhases()
-                  , unitCatalog.idConnectionType()
-                  , unitCatalog.minOpAcPow()
-                  , unitCatalog.maxOpAcPow()
-                  , unitCatalog.minOpRPow()
-                  , unitCatalog.maxOpRPow()
-                  , unitCatalog.Z0_re()
-                  , unitCatalog.Z0_im()
-                  , unitCatalog.Z1_re()
-                  , unitCatalog.Z1_im()
-                  , unitCatalog.Z2_re()
-                  , unitCatalog.Z2_im()
-                  , unitCatalog.Z0trans_re()
-                  , unitCatalog.Z0trans_im()
-                  , unitCatalog.Z1trans_re()
-                  , unitCatalog.Z1trans_im()
-                  , unitCatalog.Z2trans_re()
-                  , unitCatalog.Z2trans_im()
-                  , unitCatalog.Z0sub_re()
-                  , unitCatalog.Z0sub_im()
-                  , unitCatalog.Z1sub_re()
-                  , unitCatalog.Z1sub_im()
-                  , unitCatalog.Z2sub_re()
-                  , unitCatalog.Z2sub_im());
+            insert_unit(jobID
+                        , unitCatalog.typeID()
+                        , 1
+                        , unitCatalog.id()
+                        , unitCatalog.name()
+                        , unitCatalog.aliasName()
+                        , unitCatalog.description()
+                        , unitCatalog.idRatedVol()
+                        , unitCatalog.idRatedPower()
+                        , unitCatalog.idNumberOfPhases()
+                        , unitCatalog.idConnectionType()
+                        , unitCatalog.minOpAcPow()
+                        , unitCatalog.maxOpAcPow()
+                        , unitCatalog.minOpRPow()
+                        , unitCatalog.maxOpRPow()
+                        , unitCatalog.Z0_re()
+                        , unitCatalog.Z0_im()
+                        , unitCatalog.Z1_re()
+                        , unitCatalog.Z1_im()
+                        , unitCatalog.Z2_re()
+                        , unitCatalog.Z2_im()
+                        , unitCatalog.Z0trans_re()
+                        , unitCatalog.Z0trans_im()
+                        , unitCatalog.Z1trans_re()
+                        , unitCatalog.Z1trans_im()
+                        , unitCatalog.Z2trans_re()
+                        , unitCatalog.Z2trans_im()
+                        , unitCatalog.Z0sub_re()
+                        , unitCatalog.Z0sub_im()
+                        , unitCatalog.Z1sub_re()
+                        , unitCatalog.Z1sub_im()
+                        , unitCatalog.Z2sub_re()
+                        , unitCatalog.Z2sub_im());
         }
+    }*/
+
+    int lastItem = ui->tableView->model()->rowCount();
+    if(lastItem >= 1)
+    {
+        ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));
     }
 }
 
@@ -3424,21 +3922,23 @@ void searchDialog::catMotorClicked(int jobID)
     bool exst = false;
 
     catMotor motorCatalog(this);
-    motorCatalog.setJobID(jobID);
-    motorCatalog.setProducer(select_producers(), 0);
+    if(preJob == 0)
+        preJob = jobID;
+    motorCatalog.setJobID(preJob);
+    motorCatalog.setProducer(select_producers(), 0, 1);
     motorCatalog.setID(0);
-    motorCatalog.setName("Asynchronous Motor Catalog");
-    motorCatalog.setAliasName("aMotorCat");
-    motorCatalog.setNumberOfPhases(select_numberOfPhases(), 0);
-    motorCatalog.setRatedVoltage(select_ratedVoltage(), 0);
-    motorCatalog.setnmp(0);
-    motorCatalog.setpow(0);
-    motorCatalog.seteff(0);
-    motorCatalog.setload(0);
-    motorCatalog.setrpm(0);
-    motorCatalog.setisu(0);
-    motorCatalog.setrx(0);
-    motorCatalog.setDescription("This is an Asynchronous Motor Catalog");
+    motorCatalog.setName("Asynchronous Motor Catalog", 1);
+    motorCatalog.setAliasName("aMotorCat", 1);
+    motorCatalog.setNumberOfPhases(select_numberOfPhases(), 0, 1);
+    motorCatalog.setRatedVoltage(select_ratedVoltage(), 0, 1);
+    motorCatalog.setnmp(0, 1);
+    motorCatalog.setpow(0, 1);
+    motorCatalog.seteff(0, 1);
+    motorCatalog.setload(0, 1);
+    motorCatalog.setrpm(0, 1);
+    motorCatalog.setisu(0, 1);
+    motorCatalog.setrx(0, 1);
+    motorCatalog.setDescription("This is an Asynchronous Motor Catalog", 1);
 
     if (motorCatalog.exec() == QDialog::Accepted)
     {
@@ -3457,23 +3957,27 @@ void searchDialog::catMotorClicked(int jobID)
 
         if(exst == false)
         {
-        insert_motor(jobID
-                   , motorCatalog.typeID()
-                   , select_prodID(motorCatalog.prodName())
-                   , motorCatalog.id()
-                   , motorCatalog.name()
-                   , motorCatalog.aliasName()
-                   , motorCatalog.description()
-                   , motorCatalog.idRatedVol()
-                   , motorCatalog.idNumberOfPhases()
-                   , motorCatalog.nmp()
-                   , motorCatalog.pow()
-                   , motorCatalog.eff()
-                   , motorCatalog.load()
-                   , motorCatalog.rpm()
-                   , motorCatalog.isu()
-                   , motorCatalog.rx());
-        select_searchMotor();
+            //int randJ = updateRandomNumber().toInt();
+            insert_motor(preJob
+                         , motorCatalog.typeID()
+                         , select_prodID(motorCatalog.prodName())
+                         , motorCatalog.id()
+                         , motorCatalog.name()
+                         , motorCatalog.aliasName()
+                         , motorCatalog.description()
+                         , motorCatalog.idRatedVol()
+                         , motorCatalog.idNumberOfPhases()
+                         , motorCatalog.nmp()
+                         , motorCatalog.pow()
+                         , motorCatalog.eff()
+                         , motorCatalog.load()
+                         , motorCatalog.rpm()
+                         , motorCatalog.isu()
+                         , motorCatalog.rx());
+           // searchJobs nj(this);
+            //nj.insert_job(randJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            select_searchMotor();
+
         }
 
         if(exst == true)
@@ -3484,33 +3988,47 @@ void searchDialog::catMotorClicked(int jobID)
         }
         else
         {
-            messageBox exist(2,this);
-            exist.show();
-            exist.exec();
+            if(checkBox == false)
+            {
+                messageBox exist(2,this);
+                exist.show();
+                if(exist.exec() == QDialog::Accepted)
+                {
+                    if(exist.checkBox == true)
+                    checkBox = true;
+                }
+            }
         }
 
     }
-    else
+   /* else
     {
         if(exst == false)
         {
-        insert_motor(jobID
-                   , motorCatalog.typeID()
-                   , 1
-                   , motorCatalog.id()
-                   , motorCatalog.name()
-                   , motorCatalog.aliasName()
-                   , motorCatalog.description()
-                   , motorCatalog.idRatedVol()
-                   , motorCatalog.idNumberOfPhases()
-                   , motorCatalog.nmp()
-                   , motorCatalog.pow()
-                   , motorCatalog.eff()
-                   , motorCatalog.load()
-                   , motorCatalog.rpm()
-                   , motorCatalog.isu()
-                   , motorCatalog.rx());
+            insert_motor(jobID
+                         , motorCatalog.typeID()
+                         , 1
+                         , motorCatalog.id()
+                         , motorCatalog.name()
+                         , motorCatalog.aliasName()
+                         , motorCatalog.description()
+                         , motorCatalog.idRatedVol()
+                         , motorCatalog.idNumberOfPhases()
+                         , motorCatalog.nmp()
+                         , motorCatalog.pow()
+                         , motorCatalog.eff()
+                         , motorCatalog.load()
+                         , motorCatalog.rpm()
+                         , motorCatalog.isu()
+                         , motorCatalog.rx());
+            select_searchConsumer();
         }
+    }*/
+
+    int lastItem = ui->tableView->model()->rowCount();
+    if(lastItem >= 1)
+    {
+        ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));
     }
 }
 
@@ -3547,18 +4065,21 @@ void searchDialog::plaMotorClicked(int jobID)
 
         if(exst == false)
         {
-        insert_motorPla(select_systemID(motorPlac.systemName())
-                      , jobID
-                      , motorPlac.typeID()
-                      , select_prodID(motorPlac.prodName())
-                      , motorPlac.id()
-                      , motorPlac.name()
-                      , motorPlac.aliasName()
-                      , motorPlac.description()
-                      , motorPlac.idPhaseCode()
-                      , motorPlac.idCatalogType()
-                      , motorPlac.idConnectionType());
-        select_searchMotorPla();
+            int randJ = updateRandomNumber().toInt();
+            insert_motorPla(select_systemID(motorPlac.systemName())
+                            , randJ
+                            , motorPlac.typeID()
+                            , select_prodID(motorPlac.prodName())
+                            , motorPlac.id()
+                            , motorPlac.name()
+                            , motorPlac.aliasName()
+                            , motorPlac.description()
+                            , motorPlac.idPhaseCode()
+                            , motorPlac.idCatalogType()
+                            , motorPlac.idConnectionType());
+            searchJobs nj(this);
+            nj.insert_job(randJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            select_searchMotorPla();
         }
 
         if(exst == true)
@@ -3569,9 +4090,16 @@ void searchDialog::plaMotorClicked(int jobID)
         }
         else
         {
-            messageBox exist(2,this);
-            exist.show();
-            exist.exec();
+            if(checkBox == false)
+            {
+                messageBox exist(2,this);
+                exist.show();
+                if(exist.exec() == QDialog::Accepted)
+                {
+                    if(exist.checkBox == true)
+                    checkBox = true;
+                }
+            }
         }
     }
 
@@ -3579,20 +4107,26 @@ void searchDialog::plaMotorClicked(int jobID)
     {
         if(exst == false)
         {
-        insert_motorPla(select_systemID(motorPlac.systemName())
-                      , jobID
-                      , motorPlac.typeID()
-                      , 1
-                      , motorPlac.id()
-                      , motorPlac.name()
-                      , motorPlac.aliasName()
-                      , motorPlac.description()
-                      , motorPlac.idPhaseCode()
-                      , motorPlac.idCatalogType()
-                      , motorPlac.idConnectionType());
+            insert_motorPla(select_systemID(motorPlac.systemName())
+                            , updateRandomNumber().toInt()
+                            , motorPlac.typeID()
+                            , 1
+                            , motorPlac.id()
+                            , motorPlac.name()
+                            , motorPlac.aliasName()
+                            , motorPlac.description()
+                            , motorPlac.idPhaseCode()
+                            , motorPlac.idCatalogType()
+                            , motorPlac.idConnectionType());
         }
     }
 
+
+    int lastItem = ui->tableView->model()->rowCount();
+    if(lastItem >= 1)
+    {
+        ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));
+    }
 }
 
 void searchDialog::plaUnitClicked(int jobID)
@@ -3633,24 +4167,27 @@ void searchDialog::plaUnitClicked(int jobID)
 
         if(exst == false)
         {
-        insert_unitPlacement(select_systemID(unitPlacement.systemName())
-                           , jobID
-                           , unitPlacement.typeID()
-                           , select_prodID(unitPlacement.prodName())
-                           , unitPlacement.id()
-                           , unitPlacement.name()
-                           , unitPlacement.aliasName()
-                           , unitPlacement.description()
-                           , unitPlacement.phaseCode()
-                           , unitPlacement.catalogType()
-                           , unitPlacement.nodeType()
-                           , unitPlacement.loadType()
-                           , unitPlacement.loadDemand()
-                           , unitPlacement.des()
-                           , unitPlacement.grounded()
-                           , unitPlacement.r()
-                           , unitPlacement.x());
-        select_searchUnitPla();
+            int randJ = updateRandomNumber().toInt();
+            insert_unitPlacement(select_systemID(unitPlacement.systemName())
+                                 , randJ
+                                 , unitPlacement.typeID()
+                                 , select_prodID(unitPlacement.prodName())
+                                 , unitPlacement.id()
+                                 , unitPlacement.name()
+                                 , unitPlacement.aliasName()
+                                 , unitPlacement.description()
+                                 , unitPlacement.phaseCode()
+                                 , unitPlacement.catalogType()
+                                 , unitPlacement.nodeType()
+                                 , unitPlacement.loadType()
+                                 , unitPlacement.loadDemand()
+                                 , unitPlacement.des()
+                                 , unitPlacement.grounded()
+                                 , unitPlacement.r()
+                                 , unitPlacement.x());
+            searchJobs nj(this);
+            nj.insert_job(randJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            select_searchUnitPla();
         }
 
         if(exst == true)
@@ -3661,9 +4198,16 @@ void searchDialog::plaUnitClicked(int jobID)
         }
         else
         {
-            messageBox exist(2,this);
-            exist.show();
-            exist.exec();
+            if(checkBox == false)
+            {
+                messageBox exist(2,this);
+                exist.show();
+                if(exist.exec() == QDialog::Accepted)
+                {
+                    if(exist.checkBox == true)
+                    checkBox = true;
+                }
+            }
         }
     }
 
@@ -3671,23 +4215,23 @@ void searchDialog::plaUnitClicked(int jobID)
     {
         if(exst == false)
         {
-        insert_unitPlacement(select_systemID(unitPlacement.systemName())
-                           , jobID
-                           , unitPlacement.typeID()
-                           , 1
-                           , unitPlacement.id()
-                           , unitPlacement.name()
-                           , unitPlacement.aliasName()
-                           , unitPlacement.description()
-                           , unitPlacement.phaseCode()
-                           , unitPlacement.catalogType()
-                           , unitPlacement.nodeType()
-                           , unitPlacement.loadType()
-                           , unitPlacement.loadDemand()
-                           , unitPlacement.des()
-                           , unitPlacement.grounded()
-                           , unitPlacement.r()
-                           , unitPlacement.x());
+            insert_unitPlacement(select_systemID(unitPlacement.systemName())
+                                 , updateRandomNumber().toInt()
+                                 , unitPlacement.typeID()
+                                 , 1
+                                 , unitPlacement.id()
+                                 , unitPlacement.name()
+                                 , unitPlacement.aliasName()
+                                 , unitPlacement.description()
+                                 , unitPlacement.phaseCode()
+                                 , unitPlacement.catalogType()
+                                 , unitPlacement.nodeType()
+                                 , unitPlacement.loadType()
+                                 , unitPlacement.loadDemand()
+                                 , unitPlacement.des()
+                                 , unitPlacement.grounded()
+                                 , unitPlacement.r()
+                                 , unitPlacement.x());
         }
     }
 
@@ -3707,242 +4251,548 @@ void searchDialog::plaResistorClicked(int jobID)
     shuntResistor.setDescription("This is a Resistor Placement");
     shuntResistor.setCatalogType(select_catalogType_Shunt(), 0);
 
-         if ( shuntResistor.exec() == QDialog::Accepted)
-         {
-             for(int i=0; i < ui->tableView->model()->rowCount(); i++)
-             {
+    if ( shuntResistor.exec() == QDialog::Accepted)
+    {
+        for(int i=0; i < ui->tableView->model()->rowCount(); i++)
+        {
 
-                 QModelIndex ind = ui->tableView->model()->index(i,2);
-                 ui->tableView->selectionModel()->select(ind, QItemSelectionModel::Select);
-                 int val2 = ui->tableView->model()->data(ind).toInt();
+            QModelIndex ind = ui->tableView->model()->index(i,2);
+            ui->tableView->selectionModel()->select(ind, QItemSelectionModel::Select);
+            int val2 = ui->tableView->model()->data(ind).toInt();
 
-                 if(shuntResistor.ID() == val2)
-                 {
-                     exst = true;
-                 }
-             }
-
-             if(exst == false)
-             {
-             insert_shuntResistor( select_systemID(shuntResistor.systemName())
-                                 , jobID
-                                 , shuntResistor.typeID()
-                                 , select_prodID(shuntResistor.prodName())
-                                 , shuntResistor.ID()
-                                 , shuntResistor.name()
-                                 , shuntResistor.aliasName()
-                                 , shuntResistor.description()
-                                 , shuntResistor.idCatalogType());
-            select_searchShuntRes();
-             }
-
-            if(exst == true)
+            if(shuntResistor.ID() == val2)
             {
-                messageBox exist(1, this);
-                exist.show();
-                exist.exec();
+                exst = true;
             }
-            else
+        }
+
+        if(exst == false)
+        {
+            int randJ = updateRandomNumber().toInt();
+            insert_shuntResistor( select_systemID(shuntResistor.systemName())
+                                  , randJ
+                                  , shuntResistor.typeID()
+                                  , select_prodID(shuntResistor.prodName())
+                                  , shuntResistor.ID()
+                                  , shuntResistor.name()
+                                  , shuntResistor.aliasName()
+                                  , shuntResistor.description()
+                                  , shuntResistor.idCatalogType());
+            searchJobs nj(this);
+            nj.insert_job(randJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            select_searchShuntRes();
+        }
+
+        if(exst == true)
+        {
+            messageBox exist(1, this);
+            exist.show();
+            exist.exec();
+        }
+        else
+        {
+            if(checkBox == false)
             {
                 messageBox exist(2,this);
                 exist.show();
-                exist.exec();
+                if(exist.exec() == QDialog::Accepted)
+                {
+                    if(exist.checkBox == true)
+                    checkBox = true;
+                }
             }
-         }
+        }
+    }
 
-         else
-         {
-             if(exst == false)
-             {
-             insert_shuntResistor( select_systemID(shuntResistor.systemName())
-                                 , jobID
-                                 , shuntResistor.typeID()
-                                 , 1
-                                 , shuntResistor.ID()
-                                 , shuntResistor.name()
-                                 , shuntResistor.aliasName()
-                                 , shuntResistor.description()
-                                 , shuntResistor.idCatalogType());
-             }
-         }
+    else
+    {
+        if(exst == false)
+        {
+            insert_shuntResistor( select_systemID(shuntResistor.systemName())
+                                  , updateRandomNumber().toInt()
+                                  , shuntResistor.typeID()
+                                  , 1
+                                  , shuntResistor.ID()
+                                  , shuntResistor.name()
+                                  , shuntResistor.aliasName()
+                                  , shuntResistor.description()
+                                  , shuntResistor.idCatalogType());
+        }
+    }
 }
 
 void searchDialog::on_editPushButton_clicked()
 {
 
-        if(chs == 1)
-        {
-            catConsEdtClicked();
-        }
+    if(chs == 1)
+    {
+        catConsEdtClicked();
+    }
 
-        else if(chs==2)
-        {
-            catUnitEdtClicked();
-        }
+    else if(chs==2)
+    {
+        catUnitEdtClicked();
+    }
 
-        else if(chs == 3)
-        {
-            catMotorEdtClicked();
-        }
+    else if(chs == 3)
+    {
+        catMotorEdtClicked();
+    }
 
-        else if(chs == 4)
-        {
-            plaMotorEdtClicked();
-        }
+    else if(chs == 4)
+    {
+        plaMotorEdtClicked();
+    }
 
-        else if(chs == 5)
-        {
-            plaUnitEdtClicked();
-        }
+    else if(chs == 5)
+    {
+        plaUnitEdtClicked();
+    }
 
-        else if(chs == 6)
-        {
-            plaResistorEdtClicked();
-        }
+    else if(chs == 6)
+    {
+        plaResistorEdtClicked();
+    }
 }
 
 void searchDialog::catConsEdtClicked()
 {
     setConsValues();
     catConsumer catCons(this);
-    catCons.setJobID(select_catJobID(val.toInt()));
-    catCons.setProducer(select_producers(), prodVal.toInt());
-    catCons.setID2(val);
-    catCons.setName(nameVal);
-    catCons.setAliasName(aliasVal);
-    catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt());
-    catCons.setKP0(kp0Val.toFloat());
-    catCons.setKQ0(kq0Val.toFloat());
-    catCons.setKP1(kp1Val.toFloat());
-    catCons.setKQ1(kq1Val.toFloat());
-    catCons.setKP2(kp2Val.toFloat());
-    catCons.setKQ2(kq2Val.toFloat());
-    catCons.setDescription(descVal);
+    int oldJobID = jobVal.toInt();//select_catJobID(val.toInt());
 
-    if (catCons.exec() == QDialog::Accepted)
+    if(jobVal.toInt() >=1 && jobVal.toInt() == refJob2)
     {
-        updateConsumer( catCons.name()
-                      , catCons.aliasName()
-                      , catCons.description()
-                      , catCons.idRatedVol()
-                      , catCons.kP0()
-                      , catCons.kQ0()
-                      , catCons.kP1()
-                      , catCons.kQ1()
-                      , catCons.kP2()
-                      , catCons.kQ2());
-        select_searchConsumer();
+        catCons.setJobID(refJob2);
+        catCons.setProducer(select_producers(), prodVal.toInt(), 0);
+        catCons.setDisabledID(val);
+        catCons.setName(nameVal, 0);
+        catCons.setAliasName(aliasVal, 0);
+        catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 0);
+        catCons.setKP0(kp0Val.toFloat(), 0);
+        catCons.setKQ0(kq0Val.toFloat(), 0);
+        catCons.setKP1(kp1Val.toFloat(), 0);
+        catCons.setKQ1(kq1Val.toFloat(), 0);
+        catCons.setKP2(kp2Val.toFloat(), 0);
+        catCons.setKQ2(kq2Val.toFloat(), 0);
+        catCons.setDescription(descVal, 0);
+
+        if (catCons.exec() == QDialog::Accepted)
+        {
+
+        }
     }
+
+    else if(jobVal.toInt() >=1 && jobVal.toInt() != refJob2)
+    {
+        catCons.setJobID(refJob2);
+        catCons.setProducer(select_producers(), prodVal.toInt(), 1);
+        catCons.setDisabledID(val);
+        catCons.setName(nameVal, 1);
+        catCons.setAliasName(aliasVal, 1);
+        catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+        catCons.setKP0(kp0Val.toFloat(), 1);
+        catCons.setKQ0(kq0Val.toFloat(), 1);
+        catCons.setKP1(kp1Val.toFloat(), 1);
+        catCons.setKQ1(kq1Val.toFloat(), 1);
+        catCons.setKP2(kp2Val.toFloat(), 1);
+        catCons.setKQ2(kq2Val.toFloat(), 1);
+        catCons.setDescription(descVal, 1);
+
+        if (catCons.exec() == QDialog::Accepted)
+        {
+            //int randJ = updateRandomNumber().toInt();
+            insert_consumer(refJob2
+                            , catCons.typeID()
+                            , select_prodID(catCons.prodName())
+                            , val.toInt()
+                            , catCons.name()
+                            , catCons.aliasName()
+                            , catCons.description()
+                            , catCons.idRatedVol()
+                            , catCons.kP0()
+                            , catCons.kQ0()
+                            , catCons.kP1()
+                            , catCons.kQ1()
+                            , catCons.kP2()
+                            , catCons.kQ2());
+
+            updateConsEditFlag(oldJobID, refJob2);
+
+            searchJobs nj(this);
+            nj.insert_job(refJob2, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            //nj.update_job(oldJobID, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), randJ);
+            select_searchConsumer();
+            oldJobID = jobVal.toInt();
+        }
+    }
+
+    else if(jobVal.toInt() <=0 && jobVal.toInt() == refJob2)
+    {
+        catCons.setJobID(refJob2);
+        catCons.setProducer(select_producers(), prodVal.toInt(), 1);
+        catCons.setDisabledID(val);
+        catCons.setName(nameVal, 1);
+        catCons.setAliasName(aliasVal, 1);
+        catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+        catCons.setKP0(kp0Val.toFloat(), 1);
+        catCons.setKQ0(kq0Val.toFloat(), 1);
+        catCons.setKP1(kp1Val.toFloat(), 1);
+        catCons.setKQ1(kq1Val.toFloat(), 1);
+        catCons.setKP2(kp2Val.toFloat(), 1);
+        catCons.setKQ2(kq2Val.toFloat(), 1);
+        catCons.setDescription(descVal, 1);
+
+        if (catCons.exec() == QDialog::Accepted)
+        {
+            updateConsumer(catCons.name()
+                        , catCons.aliasName()
+                        , catCons.description()
+                        , catCons.idRatedVol()
+                        , catCons.kP0()
+                        , catCons.kQ0()
+                        , catCons.kP1()
+                        , catCons.kQ1()
+                        , catCons.kP2()
+                        , catCons.kQ2());
+            select_searchConsumer();
+        }
+    }
+
+    else if(jobVal.toInt() <= 0 && jobVal.toInt() != refJob2)
+    {
+        catCons.setJobID(oldJobID);
+        catCons.setProducer(select_producers(), prodVal.toInt(), 0);
+        catCons.setDisabledID(val);
+        catCons.setName(nameVal, 0);
+        catCons.setAliasName(aliasVal, 0);
+        catCons.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 0);
+        catCons.setKP0(kp0Val.toFloat(), 0);
+        catCons.setKQ0(kq0Val.toFloat(), 0);
+        catCons.setKP1(kp1Val.toFloat(), 0);
+        catCons.setKQ1(kq1Val.toFloat(), 0);
+        catCons.setKP2(kp2Val.toFloat(), 0);
+        catCons.setKQ2(kq2Val.toFloat(), 0);
+        catCons.setDescription(descVal, 0);
+
+        if (catCons.exec() == QDialog::Accepted)
+        {
+
+        }
+    }
+
 }
 
 void searchDialog::catUnitEdtClicked()
 {
     setUnitValues();
     catUnit unitCatalog(this);
-    unitCatalog.setJobID(select_catJobID(val.toInt()));
-    unitCatalog.setProducer(select_producers(), prodVal.toInt());
-    unitCatalog.setID2(val);
-    unitCatalog.setName(nameVal);
-    unitCatalog.setAliasName(aliasVal);
-    unitCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt());
-    unitCatalog.setRatedPower(select_ratedPower(), rPowVal.toInt());
-    unitCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt());
-    unitCatalog.setConnectionType(select_connectionType(), cTypeVal.toInt());
-    unitCatalog.setminOpAcPow(minOpAcPowVal.toFloat());
-    unitCatalog.setmaxOpAcPow(maxOpAcPowVal.toFloat());
-    unitCatalog.setminOpRPow(minOpRPowVal.toFloat());
-    unitCatalog.setmaxOpRPow(maxOpRPowVal.toFloat());
-    unitCatalog.setZ0_re(Z0_reVal.toFloat());
-    unitCatalog.setZ0_im(Z0_imVal.toFloat());
-    unitCatalog.setZ1_re(Z1_reVal.toFloat());
-    unitCatalog.setZ1_im(Z1_imVal.toFloat());
-    unitCatalog.setZ2_re(Z2_reVal.toFloat());
-    unitCatalog.setZ2_im(Z2_imVal.toFloat());
-    unitCatalog.setZ0trans_re(Z0trans_reVal.toFloat());
-    unitCatalog.setZ0trans_im(Z0trans_imVal.toFloat());
-    unitCatalog.setZ1trans_re(Z1trans_reVal.toFloat());
-    unitCatalog.setZ1trans_im(Z1trans_imVal.toFloat());
-    unitCatalog.setZ2trans_re(Z2trans_reVal.toFloat());
-    unitCatalog.setZ2trans_im(Z2trans_imVal.toFloat());
-    unitCatalog.setZ0sub_re(Z0sub_reVal.toFloat());
-    unitCatalog.setZ0sub_im(Z0sub_imVal.toFloat());
-    unitCatalog.setZ1sub_re(Z1sub_reVal.toFloat());
-    unitCatalog.setZ1sub_im(Z1sub_imVal.toFloat());
-    unitCatalog.setZ2sub_re(Z2sub_reVal.toFloat());
-    unitCatalog.setZ2sub_im(Z2sub_imVal.toFloat());
-    unitCatalog.setDescription(descVal);
+    int oldJobID = jobVal.toInt();//select_catJobID(val.toInt());
+
+    if(jobVal.toInt() >=1)
+    {
+    unitCatalog.setJobID(refJob2);
+    unitCatalog.setProducer(select_producers(), prodVal.toInt(), 1);
+    unitCatalog.setDisabledID(val);
+    unitCatalog.setName(nameVal, 1);
+    unitCatalog.setAliasName(aliasVal, 1);
+    unitCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+    unitCatalog.setRatedPower(select_ratedPower(), rPowVal.toInt(), 1);
+    unitCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 1);
+    unitCatalog.setConnectionType(select_connectionType(), cTypeVal.toInt(), 1);
+    unitCatalog.setminOpAcPow(minOpAcPowVal.toFloat(), 1);
+    unitCatalog.setmaxOpAcPow(maxOpAcPowVal.toFloat(), 1);
+    unitCatalog.setminOpRPow(minOpRPowVal.toFloat(), 1);
+    unitCatalog.setmaxOpRPow(maxOpRPowVal.toFloat(), 1);
+    unitCatalog.setZ0_re(Z0_reVal.toFloat(), 1);
+    unitCatalog.setZ0_im(Z0_imVal.toFloat(), 1);
+    unitCatalog.setZ1_re(Z1_reVal.toFloat(), 1);
+    unitCatalog.setZ1_im(Z1_imVal.toFloat(), 1);
+    unitCatalog.setZ2_re(Z2_reVal.toFloat(), 1);
+    unitCatalog.setZ2_im(Z2_imVal.toFloat(), 1);
+    unitCatalog.setZ0trans_re(Z0trans_reVal.toFloat(), 1);
+    unitCatalog.setZ0trans_im(Z0trans_imVal.toFloat(), 1);
+    unitCatalog.setZ1trans_re(Z1trans_reVal.toFloat(), 1);
+    unitCatalog.setZ1trans_im(Z1trans_imVal.toFloat(), 1);
+    unitCatalog.setZ2trans_re(Z2trans_reVal.toFloat(), 1);
+    unitCatalog.setZ2trans_im(Z2trans_imVal.toFloat(), 1);
+    unitCatalog.setZ0sub_re(Z0sub_reVal.toFloat(), 1);
+    unitCatalog.setZ0sub_im(Z0sub_imVal.toFloat(), 1);
+    unitCatalog.setZ1sub_re(Z1sub_reVal.toFloat(), 1);
+    unitCatalog.setZ1sub_im(Z1sub_imVal.toFloat(), 1);
+    unitCatalog.setZ2sub_re(Z2sub_reVal.toFloat(), 1);
+    unitCatalog.setZ2sub_im(Z2sub_imVal.toFloat(), 1);
+    unitCatalog.setDescription(descVal, 1);
 
     if (unitCatalog.exec() == QDialog::Accepted)
     {
-        updateUnit(unitCatalog.name()
-                  , unitCatalog.aliasName()
-                  , unitCatalog.description()
-                  , unitCatalog.idRatedVol()
-                  , unitCatalog.idRatedPower()
-                  , unitCatalog.idNumberOfPhases()
-                  , unitCatalog.idConnectionType()
-                  , unitCatalog.minOpAcPow()
-                  , unitCatalog.maxOpAcPow()
-                  , unitCatalog.minOpRPow()
-                  , unitCatalog.maxOpRPow()
-                  , unitCatalog.Z0_re()
-                  , unitCatalog.Z0_im()
-                  , unitCatalog.Z1_re()
-                  , unitCatalog.Z1_im()
-                  , unitCatalog.Z2_re()
-                  , unitCatalog.Z2_im()
-                  , unitCatalog.Z0trans_re()
-                  , unitCatalog.Z0trans_im()
-                  , unitCatalog.Z1trans_re()
-                  , unitCatalog.Z1trans_im()
-                  , unitCatalog.Z2trans_re()
-                  , unitCatalog.Z2trans_im()
-                  , unitCatalog.Z0sub_re()
-                  , unitCatalog.Z0sub_im()
-                  , unitCatalog.Z1sub_re()
-                  , unitCatalog.Z1sub_im()
-                  , unitCatalog.Z2sub_re()
-                  , unitCatalog.Z2sub_im());
+        insert_unit(refJob2
+                    , unitCatalog.typeID()
+                    , select_prodID(unitCatalog.prodName())
+                    , unitCatalog.id()
+                    , unitCatalog.name()
+                    , unitCatalog.aliasName()
+                    , unitCatalog.description()
+                    , unitCatalog.idRatedVol()
+                    , unitCatalog.idRatedPower()
+                    , unitCatalog.idNumberOfPhases()
+                    , unitCatalog.idConnectionType()
+                    , unitCatalog.minOpAcPow()
+                    , unitCatalog.maxOpAcPow()
+                    , unitCatalog.minOpRPow()
+                    , unitCatalog.maxOpRPow()
+                    , unitCatalog.Z0_re()
+                    , unitCatalog.Z0_im()
+                    , unitCatalog.Z1_re()
+                    , unitCatalog.Z1_im()
+                    , unitCatalog.Z2_re()
+                    , unitCatalog.Z2_im()
+                    , unitCatalog.Z0trans_re()
+                    , unitCatalog.Z0trans_im()
+                    , unitCatalog.Z1trans_re()
+                    , unitCatalog.Z1trans_im()
+                    , unitCatalog.Z2trans_re()
+                    , unitCatalog.Z2trans_im()
+                    , unitCatalog.Z0sub_re()
+                    , unitCatalog.Z0sub_im()
+                    , unitCatalog.Z1sub_re()
+                    , unitCatalog.Z1sub_im()
+                    , unitCatalog.Z2sub_re()
+                    , unitCatalog.Z2sub_im());
+
+        updateUnitEditFlag(oldJobID, refJob2);
+
+        searchJobs nj(this);
+        nj.insert_job(refJob2, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+        //nj.update_job(oldJobID, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), randJ);
+        oldJobID = jobVal.toInt();
         select_searchUnit();
+        }
     }
+    else if(jobVal.toInt() >=1 || jobVal.toInt() == refJob2)
+    {
+        unitCatalog.setJobID(refJob2);
+        unitCatalog.setProducer(select_producers(), prodVal.toInt(), 1);
+        unitCatalog.setDisabledID(val);
+        unitCatalog.setName(nameVal, 1);
+        unitCatalog.setAliasName(aliasVal, 1);
+        unitCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+        unitCatalog.setRatedPower(select_ratedPower(), rPowVal.toInt(), 1);
+        unitCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 1);
+        unitCatalog.setConnectionType(select_connectionType(), cTypeVal.toInt(), 1);
+        unitCatalog.setminOpAcPow(minOpAcPowVal.toFloat(), 1);
+        unitCatalog.setmaxOpAcPow(maxOpAcPowVal.toFloat(), 1);
+        unitCatalog.setminOpRPow(minOpRPowVal.toFloat(), 1);
+        unitCatalog.setmaxOpRPow(maxOpRPowVal.toFloat(), 1);
+        unitCatalog.setZ0_re(Z0_reVal.toFloat(), 1);
+        unitCatalog.setZ0_im(Z0_imVal.toFloat(), 1);
+        unitCatalog.setZ1_re(Z1_reVal.toFloat(), 1);
+        unitCatalog.setZ1_im(Z1_imVal.toFloat(), 1);
+        unitCatalog.setZ2_re(Z2_reVal.toFloat(), 1);
+        unitCatalog.setZ2_im(Z2_imVal.toFloat(), 1);
+        unitCatalog.setZ0trans_re(Z0trans_reVal.toFloat(), 1);
+        unitCatalog.setZ0trans_im(Z0trans_imVal.toFloat(), 1);
+        unitCatalog.setZ1trans_re(Z1trans_reVal.toFloat(), 1);
+        unitCatalog.setZ1trans_im(Z1trans_imVal.toFloat(), 1);
+        unitCatalog.setZ2trans_re(Z2trans_reVal.toFloat(), 1);
+        unitCatalog.setZ2trans_im(Z2trans_imVal.toFloat(), 1);
+        unitCatalog.setZ0sub_re(Z0sub_reVal.toFloat(), 1);
+        unitCatalog.setZ0sub_im(Z0sub_imVal.toFloat(), 1);
+        unitCatalog.setZ1sub_re(Z1sub_reVal.toFloat(), 1);
+        unitCatalog.setZ1sub_im(Z1sub_imVal.toFloat(), 1);
+        unitCatalog.setZ2sub_re(Z2sub_reVal.toFloat(), 1);
+        unitCatalog.setZ2sub_im(Z2sub_imVal.toFloat(), 1);
+        unitCatalog.setDescription(descVal, 1);
+
+        if (unitCatalog.exec() == QDialog::Accepted)
+        {
+            updateUnit(unitCatalog.name()
+                        , unitCatalog.aliasName()
+                        , unitCatalog.description()
+                        , unitCatalog.idRatedVol()
+                        , unitCatalog.idRatedPower()
+                        , unitCatalog.idNumberOfPhases()
+                        , unitCatalog.idConnectionType()
+                        , unitCatalog.minOpAcPow()
+                        , unitCatalog.maxOpAcPow()
+                        , unitCatalog.minOpRPow()
+                        , unitCatalog.maxOpRPow()
+                        , unitCatalog.Z0_re()
+                        , unitCatalog.Z0_im()
+                        , unitCatalog.Z1_re()
+                        , unitCatalog.Z1_im()
+                        , unitCatalog.Z2_re()
+                        , unitCatalog.Z2_im()
+                        , unitCatalog.Z0trans_re()
+                        , unitCatalog.Z0trans_im()
+                        , unitCatalog.Z1trans_re()
+                        , unitCatalog.Z1trans_im()
+                        , unitCatalog.Z2trans_re()
+                        , unitCatalog.Z2trans_im()
+                        , unitCatalog.Z0sub_re()
+                        , unitCatalog.Z0sub_im()
+                        , unitCatalog.Z1sub_re()
+                        , unitCatalog.Z1sub_im()
+                        , unitCatalog.Z2sub_re()
+                        , unitCatalog.Z2sub_im());
+            select_searchUnit();
+        }
+    }
+
+    else if(jobVal.toInt() <= 0)
+    {
+        unitCatalog.setJobID(refJob2);
+        unitCatalog.setProducer(select_producers(), prodVal.toInt(), 0);
+        unitCatalog.setDisabledID(val);
+        unitCatalog.setName(nameVal, 0);
+        unitCatalog.setAliasName(aliasVal, 0);
+        unitCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 0);
+        unitCatalog.setRatedPower(select_ratedPower(), rPowVal.toInt(), 0);
+        unitCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 0);
+        unitCatalog.setConnectionType(select_connectionType(), cTypeVal.toInt(), 0);
+        unitCatalog.setminOpAcPow(minOpAcPowVal.toFloat(), 0);
+        unitCatalog.setmaxOpAcPow(maxOpAcPowVal.toFloat(), 0);
+        unitCatalog.setminOpRPow(minOpRPowVal.toFloat(), 0);
+        unitCatalog.setmaxOpRPow(maxOpRPowVal.toFloat(), 0);
+        unitCatalog.setZ0_re(Z0_reVal.toFloat(), 0);
+        unitCatalog.setZ0_im(Z0_imVal.toFloat(), 0);
+        unitCatalog.setZ1_re(Z1_reVal.toFloat(), 0);
+        unitCatalog.setZ1_im(Z1_imVal.toFloat(), 0);
+        unitCatalog.setZ2_re(Z2_reVal.toFloat(), 0);
+        unitCatalog.setZ2_im(Z2_imVal.toFloat(), 0);
+        unitCatalog.setZ0trans_re(Z0trans_reVal.toFloat(), 0);
+        unitCatalog.setZ0trans_im(Z0trans_imVal.toFloat(), 0);
+        unitCatalog.setZ1trans_re(Z1trans_reVal.toFloat(), 0);
+        unitCatalog.setZ1trans_im(Z1trans_imVal.toFloat(), 0);
+        unitCatalog.setZ2trans_re(Z2trans_reVal.toFloat(), 0);
+        unitCatalog.setZ2trans_im(Z2trans_imVal.toFloat(), 0);
+        unitCatalog.setZ0sub_re(Z0sub_reVal.toFloat(), 0);
+        unitCatalog.setZ0sub_im(Z0sub_imVal.toFloat(), 0);
+        unitCatalog.setZ1sub_re(Z1sub_reVal.toFloat(), 0);
+        unitCatalog.setZ1sub_im(Z1sub_imVal.toFloat(), 0);
+        unitCatalog.setZ2sub_re(Z2sub_reVal.toFloat(), 0);
+        unitCatalog.setZ2sub_im(Z2sub_imVal.toFloat(), 0);
+        unitCatalog.setDescription(descVal, 0);
+
+        if (unitCatalog.exec() == QDialog::Accepted)
+        {
+
+        }
+    }
+
 }
 
 void searchDialog::catMotorEdtClicked()
 {
     setMotorValues();
     catMotor motorCatalog(this);
-    motorCatalog.setJobID(select_catJobID(val.toInt()));
-    motorCatalog.setProducer(select_producers(), prodVal.toInt());
-    motorCatalog.setID2(val);
-    motorCatalog.setName(nameVal);
-    motorCatalog.setAliasName(aliasVal);
-    motorCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt());
-    motorCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt());
-    motorCatalog.setnmp(nmpVal.toFloat());
-    motorCatalog.setpow(powFVal.toFloat());
-    motorCatalog.seteff(effVal.toFloat());
-    motorCatalog.setload(loadFVal.toFloat());
-    motorCatalog.setrpm(rmpVal.toFloat());
-    motorCatalog.setisu(isuVal.toFloat());
-    motorCatalog.setrx(rxVal.toFloat());
-    motorCatalog.setDescription(descVal);
+    int oldJobID = jobVal.toInt();//select_catJobID(val.toInt());
 
-    if (motorCatalog.exec() == QDialog::Accepted)
+    if(jobVal.toInt() >=1)
     {
-        updateMotor(motorCatalog.name()
-                   , motorCatalog.aliasName()
-                   , motorCatalog.description()
-                   , motorCatalog.idRatedVol()
-                   , motorCatalog.idNumberOfPhases()
-                   , motorCatalog.nmp()
-                   , motorCatalog.pow()
-                   , motorCatalog.eff()
-                   , motorCatalog.load()
-                   , motorCatalog.rpm()
-                   , motorCatalog.isu()
-                   , motorCatalog.rx());
-        select_searchMotor();
+        motorCatalog.setJobID(refJob2);
+        motorCatalog.setProducer(select_producers(), prodVal.toInt(), 1);
+        motorCatalog.setDisabledID(val);
+        motorCatalog.setName(nameVal, 1);
+        motorCatalog.setAliasName(aliasVal, 1);
+        motorCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 1);
+        motorCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+        motorCatalog.setnmp(nmpVal.toFloat(), 1);
+        motorCatalog.setpow(powFVal.toFloat(), 1);
+        motorCatalog.seteff(effVal.toFloat(), 1);
+        motorCatalog.setload(loadFVal.toFloat(), 1);
+        motorCatalog.setrpm(rmpVal.toFloat(), 1);
+        motorCatalog.setisu(isuVal.toFloat(), 1);
+        motorCatalog.setrx(rxVal.toFloat(), 1);
+        motorCatalog.setDescription(descVal, 1);
+
+        if (motorCatalog.exec() == QDialog::Accepted)
+        {
+            insert_motor(refJob2
+                         , motorCatalog.typeID()
+                         , select_prodID(motorCatalog.prodName())
+                         , motorCatalog.id()
+                         , motorCatalog.name()
+                         , motorCatalog.aliasName()
+                         , motorCatalog.description()
+                         , motorCatalog.idRatedVol()
+                         , motorCatalog.idNumberOfPhases()
+                         , motorCatalog.nmp()
+                         , motorCatalog.pow()
+                         , motorCatalog.eff()
+                         , motorCatalog.load()
+                         , motorCatalog.rpm()
+                         , motorCatalog.isu()
+                         , motorCatalog.rx());
+
+            updateMotorEditFlag(oldJobID, refJob2);
+
+            searchJobs nj(this);
+            nj.insert_job(refJob2, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
+            //nj.update_job(oldJobID, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), randJ);
+            select_searchMotor();
+            oldJobID = jobVal.toInt();
+        }
     }
+        else if(jobVal.toInt() >=1 || jobVal.toInt() == refJob2)
+        {
+            motorCatalog.setJobID(refJob2);
+            motorCatalog.setProducer(select_producers(), prodVal.toInt(), 1);
+            motorCatalog.setDisabledID(val);
+            motorCatalog.setName(nameVal, 1);
+            motorCatalog.setAliasName(aliasVal, 1);
+            motorCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 1);
+            motorCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 1);
+            motorCatalog.setnmp(nmpVal.toFloat(), 1);
+            motorCatalog.setpow(powFVal.toFloat(), 1);
+            motorCatalog.seteff(effVal.toFloat(), 1);
+            motorCatalog.setload(loadFVal.toFloat(), 1);
+            motorCatalog.setrpm(rmpVal.toFloat(), 1);
+            motorCatalog.setisu(isuVal.toFloat(), 1);
+            motorCatalog.setrx(rxVal.toFloat(), 1);
+            motorCatalog.setDescription(descVal, 1);
+
+            if (motorCatalog.exec() == QDialog::Accepted)
+            {
+                updateMotor(motorCatalog.name()
+                            , motorCatalog.aliasName()
+                            , motorCatalog.description()
+                            , motorCatalog.idRatedVol()
+                            , motorCatalog.idNumberOfPhases()
+                            , motorCatalog.nmp()
+                            , motorCatalog.pow()
+                            , motorCatalog.eff()
+                            , motorCatalog.load()
+                            , motorCatalog.rpm()
+                            , motorCatalog.isu()
+                            , motorCatalog.rx());
+                select_searchMotor();
+            }
+        }
+
+        else if(jobVal.toInt() <= 0)
+        {
+            motorCatalog.setJobID(refJob2);
+            motorCatalog.setProducer(select_producers(), prodVal.toInt(), 0);
+            motorCatalog.setDisabledID(val);
+            motorCatalog.setName(nameVal, 0);
+            motorCatalog.setAliasName(aliasVal, 0);
+            motorCatalog.setNumberOfPhases(select_numberOfPhases(), nopVal.toInt(), 0);
+            motorCatalog.setRatedVoltage(select_ratedVoltage(), rVoltVal.toInt(), 0);
+            motorCatalog.setnmp(nmpVal.toFloat(), 0);
+            motorCatalog.setpow(powFVal.toFloat(), 0);
+            motorCatalog.seteff(effVal.toFloat(), 0);
+            motorCatalog.setload(loadFVal.toFloat(), 0);
+            motorCatalog.setrpm(rmpVal.toFloat(), 0);
+            motorCatalog.setisu(isuVal.toFloat(), 0);
+            motorCatalog.setrx(rxVal.toFloat(), 0);
+            motorCatalog.setDescription(descVal, 0);
+            if (motorCatalog.exec() == QDialog::Accepted)
+            {
+
+            }
+        }
+
 }
 
 void searchDialog::plaMotorEdtClicked()
@@ -3952,7 +4802,7 @@ void searchDialog::plaMotorEdtClicked()
     motorPlac.setJobID(select_plaJobID(val2.toInt()));
     motorPlac.setSystemID(select_system(), systemVal.toInt());
     motorPlac.setProducer(select_producers(), prodVal.toInt());
-    motorPlac.setID2(val2);
+    motorPlac.setDisabledID(val2);
     motorPlac.setName(nameVal);
     motorPlac.setAliasName(aliasVal);
     motorPlac.setDescription(descVal);
@@ -3963,12 +4813,12 @@ void searchDialog::plaMotorEdtClicked()
     if (motorPlac.exec() == QDialog::Accepted)
     {
         updateMotorPla(select_systemID(motorPlac.systemName())
-                      , motorPlac.name()
-                      , motorPlac.aliasName()
-                      , motorPlac.description()
-                      , motorPlac.idPhaseCode()
-                      , motorPlac.idCatalogType()
-                      , motorPlac.idConnectionType());
+                       , motorPlac.name()
+                       , motorPlac.aliasName()
+                       , motorPlac.description()
+                       , motorPlac.idPhaseCode()
+                       , motorPlac.idCatalogType()
+                       , motorPlac.idConnectionType());
         select_searchMotorPla();
     }
 }
@@ -3980,7 +4830,7 @@ void searchDialog::plaUnitEdtClicked()
     unitPlacement.setJobID(select_plaJobID(val2.toInt()));
     unitPlacement.setSystemID(select_system(), systemVal.toInt());
     unitPlacement.setProducer(select_producers(), prodVal.toInt());
-    unitPlacement.setID2(val2);
+    unitPlacement.setDisabledID(val2);
     unitPlacement.setName(nameVal);
     unitPlacement.setAliasName(aliasVal);
     unitPlacement.setDescription(descVal);
@@ -3996,18 +4846,18 @@ void searchDialog::plaUnitEdtClicked()
     if (unitPlacement.exec() == QDialog::Accepted)
     {
         updateUnitPlacement(select_systemID(unitPlacement.systemName())
-                           , unitPlacement.name()
-                           , unitPlacement.aliasName()
-                           , unitPlacement.description()
-                           , unitPlacement.phaseCode()
-                           , unitPlacement.catalogType()
-                           , unitPlacement.nodeType()
-                           , unitPlacement.loadType()
-                           , unitPlacement.loadDemand()
-                           , unitPlacement.des()
-                           , unitPlacement.grounded()
-                           , unitPlacement.r()
-                           , unitPlacement.x());
+                            , unitPlacement.name()
+                            , unitPlacement.aliasName()
+                            , unitPlacement.description()
+                            , unitPlacement.phaseCode()
+                            , unitPlacement.catalogType()
+                            , unitPlacement.nodeType()
+                            , unitPlacement.loadType()
+                            , unitPlacement.loadDemand()
+                            , unitPlacement.des()
+                            , unitPlacement.grounded()
+                            , unitPlacement.r()
+                            , unitPlacement.x());
         select_searchUnitPla();
 
     }
@@ -4020,21 +4870,21 @@ void searchDialog::plaResistorEdtClicked()
     shuntResistor.setJobID(select_plaJobID(val2.toInt()));
     shuntResistor.setSystemID(select_system(),systemVal.toInt());
     shuntResistor.setProducer(select_producers(), prodVal.toInt());
-    shuntResistor.setID2(val2);
+    shuntResistor.setDisabledID(val2);
     shuntResistor.setName(nameVal);
     shuntResistor.setAliasName(aliasVal);
     shuntResistor.setDescription(descVal);
     shuntResistor.setCatalogType(select_catalogType_Shunt(), catTVal.toInt());
 
-         if ( shuntResistor.exec() == QDialog::Accepted)
-         {
-             updateShuntResistor( select_systemID(shuntResistor.systemName())
-                                 , shuntResistor.name()
-                                 , shuntResistor.aliasName()
-                                 , shuntResistor.description()
-                                 , shuntResistor.idCatalogType());
-            select_searchShuntRes();
-         }
+    if ( shuntResistor.exec() == QDialog::Accepted)
+    {
+        updateShuntResistor( select_systemID(shuntResistor.systemName())
+                             , shuntResistor.name()
+                             , shuntResistor.aliasName()
+                             , shuntResistor.description()
+                             , shuntResistor.idCatalogType());
+        select_searchShuntRes();
+    }
 }
 
 void searchDialog::on_cancelPushButton_clicked()
@@ -4044,6 +4894,11 @@ void searchDialog::on_cancelPushButton_clicked()
 
 void searchDialog::on_tableView_clicked(const QModelIndex &index)
 {
+    int inxJobID = index.row();
+    QModelIndex indJobID = ui->tableView->model()->index(inxJobID, 0);
+    ui->tableView->selectionModel()->select(index, QItemSelectionModel::Select);
+    jobVal = ui->tableView->model()->data(indJobID).toString();
+
     int inxID = index.row();
     QModelIndex indID = ui->tableView->model()->index(inxID, 1);
     ui->tableView->selectionModel()->select(index, QItemSelectionModel::Select);
@@ -4101,6 +4956,8 @@ void searchDialog::on_comboBox_currentIndexChanged(int index)
 
 void searchDialog::on_tableView_doubleClicked(const QModelIndex &index)
 {
+    index;
+
     if(chs == 1)
     {
         catConsEdtClicked();
@@ -4131,3 +4988,14 @@ void searchDialog::on_tableView_doubleClicked(const QModelIndex &index)
         plaResistorEdtClicked();
     }
 }
+
+QString searchDialog::updateRandomNumber()
+{
+    int high = -1000;
+
+    qsrand((unsigned)time(0));
+    negJobID = QString::number(0 - (qrand() % high));
+
+    return negJobID;
+}
+

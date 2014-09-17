@@ -27,7 +27,8 @@ SOURCES += main.cpp\
            selectjob.cpp \
            browse.cpp \
            messagebox.cpp \
-           addcatpla.cpp
+           addcatpla.cpp \
+    login.cpp
 
 HEADERS  += powerss.h \
             catconsumer.h \
@@ -43,7 +44,8 @@ HEADERS  += powerss.h \
             selectjob.h \
             browse.h \
             messagebox.h \
-            addcatpla.h
+            addcatpla.h \
+    login.h
 
 FORMS    += powerss.ui \
             catconsumer.ui \
@@ -58,7 +60,8 @@ FORMS    += powerss.ui \
             selectjob.ui \
             browse.ui \
             messagebox.ui \
-            addcatpla.ui
+            addcatpla.ui \
+    login.ui
 
 
 DEFINES += BOOST_ALL_DYN_LINK

@@ -5,7 +5,10 @@
 #include "td/Variant.h"
 #include "mu/TxtOutFile.h"
 #include "DebugTrace.h"
+#include "searchjobs.h"
+
 extern db::ISQLDatabase *pDB;
+extern int userID;
 
 newJob::newJob(QWidget *parent) :
     QDialog(parent),
@@ -25,9 +28,10 @@ void newJob::setEditID(QString id)
     ui->lineEdit->setDisabled(true);
 }
 
-void newJob::setID(QString id)
+void newJob::setID()
 {
-    ui->lineEdit->setText(id);
+    searchJobs nj(this);
+    ui->lineEdit->setText(nj.updateRandomNumber());
 }
 
 void newJob::setName(QString name)
@@ -38,6 +42,7 @@ void newJob::setName(QString name)
 void newJob::setUser(MyModel *n)
 {
     ui->userComboBox->setModel(n);
+    ui->userComboBox->setCurrentIndex(userID - 1);
 }
 
 void newJob::setCDate()

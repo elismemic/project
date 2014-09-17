@@ -14,16 +14,21 @@ class searchDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit searchDialog(int a = 0, QWidget *parent = 0);
+    explicit searchDialog(int a = 0, int refJob = 0, QWidget *parent = 0);
     ~searchDialog();
 
     QSortFilterProxyModel *proxy;
 
     QString val;
+    QString jobVal;
     QString val2;
     int proxComInd;
     QString oldname;
     QString oldname2;
+    int refJob2;
+    QString negJobID;
+    int preJob = 0;
+
 
     QString nameVal, aliasVal, descVal, rVoltVal, kp0Val, kq0Val, kp1Val
     , kq1Val, kp2Val, kq2Val, rPowVal, nopVal, cTypeVal, minOpAcPowVal
@@ -58,6 +63,7 @@ public:
     void plaMotorEdtClicked();
     void plaUnitEdtClicked();
     void plaResistorEdtClicked();
+    QString updateRandomNumber();
 
 
 private slots:
@@ -154,10 +160,24 @@ private:
                           , QString description, int idCatType);
     bool update_catalog(QString name);
     bool update_placement(int systemID, QString name);
-    bool update_jobCatalog(QString catName);
+    bool update_jobCatalog(int jobId, QString catName);
+    bool update_jobCatalogJobID(int oldJobID, int newJobID);
     bool update_jobPlacement(int systemID, QString catName);
 
+    bool update_consJobIdEditFlag(int oldJobID, int newJobID);
+    bool updateConsEditFlag(int jobID, int EditFlag);
+    bool updateConsEditFlagAfterAct(int oldEditFlag, int newEditFlag);
+
+    bool update_unitJobIdEditFlag(int oldJobID, int newJobID);
+    bool updateUnitEditFlag(int jobID, int EditFlag);
+    bool updateUnitEditFlagAfterAct(int oldEditFlag, int newEditFlag);
+
+    bool update_motorJobIdEditFlag(int oldJobID, int newJobID);
+    bool updateMotorEditFlag(int jobID, int EditFlag);
+    bool updateMotorEditFlagAfterAct(int oldEditFlag, int newEditFlag);
+
     friend class browse;
+    friend class searchJobs;
 };
 
 #endif // SEARCHDIALOG_H

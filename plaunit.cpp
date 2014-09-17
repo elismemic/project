@@ -18,7 +18,7 @@ plaUnit::~plaUnit()
 void plaUnit::setSystemID(MyModel *n, int a)
 {
     ui->systemComboBox->setModel(n);
-    ui->systemComboBox->setCurrentIndex(a- 1);
+    ui->systemComboBox->setCurrentIndex(a);
 }
 
 void plaUnit::setJobID(int jobID)
@@ -41,7 +41,7 @@ void plaUnit::setProducer(MyModel *n, int a)
     ui->producerComboBox->setCurrentIndex(a- 1);
 }
 
-void plaUnit::setID2(const QString n)
+void plaUnit::setDisabledID(const QString n)
 {
     ui->uidLineEdit->setText(n);
     ui->uidLineEdit->setDisabled(true);

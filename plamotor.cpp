@@ -17,7 +17,7 @@ plaMotor::~plaMotor()
 void plaMotor::setSystemID(MyModel *n, int a)
 {
     ui->systemComboBox->setModel(n);
-    ui->systemComboBox->setCurrentIndex(a- 1);
+    ui->systemComboBox->setCurrentIndex(a);
 }
 
 void plaMotor::setJobID(int jobID)
@@ -46,7 +46,7 @@ void plaMotor::setID(const int n)
     ui->uidLineEdit->setText(qStr);
 }
 
-void plaMotor::setID2(const QString n)
+void plaMotor::setDisabledID(const QString n)
 {
     ui->uidLineEdit->setText(n);
     ui->uidLineEdit->setDisabled(true);

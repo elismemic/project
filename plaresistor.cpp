@@ -17,7 +17,7 @@ plaResistor::~plaResistor()
 void plaResistor::setSystemID(MyModel *n, int a)
 {
     ui->systemComboBox->setModel(n);
-    ui->systemComboBox->setCurrentIndex(a- 1);
+    ui->systemComboBox->setCurrentIndex(a);
 }
 
 void plaResistor::setJobID(int jobID)
@@ -46,7 +46,7 @@ void plaResistor::setID(const int n)
     ui->uidLineEdit->setText(qStr);
 }
 
-void plaResistor::setID2(const QString n)
+void plaResistor::setDisabledID(const QString n)
 {
     ui->uidLineEdit->setText(n);
     ui->uidLineEdit->setDisabled(true);

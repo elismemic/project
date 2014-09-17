@@ -9,9 +9,13 @@
 #include "browse.h"
 #include "catconsumer.h"
 #include "messagebox.h"
+#include "powerss.h"
+#include "searchdialog.h"
 #include <QDate>
 
 extern db::ISQLDatabase *pDB;
+extern int userID;
+bool checkBox = false;
 
 searchJobs::searchJobs(QWidget *parent) :
     QDialog(parent),
@@ -20,8 +24,14 @@ searchJobs::searchJobs(QWidget *parent) :
     ui->setupUi(this);
     proxy = new QSortFilterProxyModel(this);
     ui->comboBox->setCurrentIndex(1);
+
     select_jobs();
 
+    int lastItem = ui->tableView->model()->rowCount();
+    if(lastItem >= 1)
+    {
+        ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));
+    }
 }
 
 searchJobs::~searchJobs()
@@ -29,13 +39,32 @@ searchJobs::~searchJobs()
     delete ui;
 }
 
+
+QString searchJobs::updateRandomNumber()
+{
+int high = -1000;
+
+qsrand((unsigned)time(0));
+negJobID = QString::number(0 - (qrand() % high));
+
+return negJobID;
+}
+
 bool searchJobs::select_jobs()
 {
     if (!pDB)
         return false;
 
+    int userId = userID;
+    td::INT4 insert_id(userId);
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT ID, Name, UserID, Status, CreationDate, ActivationDate from Jobs"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "SELECT ID, Name, UserID, Status, CreationDate, ActivationDate from Jobs where UserID=? or Status=1"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_id;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
         columns.reserve(6);
@@ -75,6 +104,7 @@ bool searchJobs::select_jobs()
         setModel(model);
 
         return true;
+
 }
 
 bool searchJobs::select_jobsValues()
@@ -140,7 +170,7 @@ bool searchJobs::select_jobsValues()
         return true;
 }
 
-bool searchJobs::insert_job(int id, QString name, int user, int status, QDate cdate, QDate adate)
+bool searchJobs::insert_job(int id, QString name, int user, int status, QDate cdate, QDate adate, int editFlag)
 {
         td::INT4 insert_id(id);
 
@@ -152,11 +182,12 @@ bool searchJobs::insert_job(int id, QString name, int user, int status, QDate cd
 
         refName = td_name;
 
-
         td::INT4 insert_stat(status);
 
         td::Date insert_cdate(cdate.year(), cdate.month(), cdate.day());
         std::cout << insert_cdate << std::endl;
+
+        td::INT4 insert_edit(editFlag);
 
         if(status == 0)
         adate.setDate(0000,00,00);
@@ -169,13 +200,13 @@ bool searchJobs::insert_job(int id, QString name, int user, int status, QDate cd
         db::Transaction trans(pDB);
 
         //create statement using parameters which will be provided later
-        db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO Jobs(ID, Name, UserID, Status, CreationDate, ActivationDate) VALUES (?,?,?,?,?,?)"));
+        db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO Jobs(ID, Name, UserID, Status, CreationDate, ActivationDate, EditFlag) VALUES (?,?,?,?,?,?,?)"));
 
 
         //allocate parameters and bind them to the statement
         db::Params params(pStat->allocParams());
         //bind params
-        params << insert_id << refName << insert_user << insert_stat << insert_cdate << insert_adate;
+        params << insert_id << refName << insert_user << insert_stat << insert_cdate << insert_adate << insert_edit;
 
 
         if (!pStat->execute())
@@ -198,14 +229,14 @@ bool searchJobs::insert_job(int id, QString name, int user, int status, QDate cd
         return bRet;
     }
 
-bool searchJobs::update_job(QString name, int user, int status, QDate cdate, QDate adate)
+bool searchJobs::update_job(int id, QString name, int user, int status, QDate cdate, QDate adate, int edit)
 {
     if (!pDB)
         return false;
 
-    int id = val.toInt();
+    int id2 = id;
 
-    td::INT4 insert_id(id);
+    td::INT4 insert_id(id2);
 
     db::Ref<td::String> refName(64);
     td::INT4 insert_user(user);
@@ -213,6 +244,9 @@ bool searchJobs::update_job(QString name, int user, int status, QDate cdate, QDa
 
     td::Date insert_cdate(cdate.year(), cdate.month(), cdate.day());
     std::cout << insert_cdate << std::endl;
+
+    int editF = edit;
+    td::INT4 insert_edit(editF);
 
     if(status == 0)
     adate.setDate(0000,00,00);
@@ -227,13 +261,123 @@ bool searchJobs::update_job(QString name, int user, int status, QDate cdate, QDa
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE Jobs SET Name=?, UserID=?, Status=?, CreationDate=?, ActivationDate=? WHERE ID=?"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE Jobs SET Name=?, UserID=?, Status=?, CreationDate=?, ActivationDate=?, EditFlag=? WHERE ID=?"));
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
 
     //bind params
-    params << refName << insert_user << insert_stat << insert_cdate << insert_adate << insert_id;
+    params << refName << insert_user << insert_stat << insert_cdate << insert_adate << insert_edit << insert_id;
+
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchJobs::update_activatedJob(int id, QString name, int user, int status, QDate cdate, QDate adate, int edit)
+{
+    if (!pDB)
+        return false;
+
+    int id1 = val.toInt();
+    td::INT4 insert_id1(id1);
+
+    int id2 = id;
+    td::INT4 insert_id(id2);
+
+    db::Ref<td::String> refName(64);
+    td::INT4 insert_user(user);
+    td::INT4 insert_stat(status);
+
+    td::Date insert_cdate(cdate.year(), cdate.month(), cdate.day());
+    std::cout << insert_cdate << std::endl;
+
+    int editF = edit;
+    td::INT4 insert_edit(editF);
+
+    if(status == 0)
+    adate.setDate(0000,00,00);
+
+    td::Date insert_adate(adate.year(), adate.month(), adate.day());
+    std::cout << insert_adate << std::endl;
+
+    td::String td_name = name.toUtf8();
+    refName = td_name;
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE Jobs SET ID=?, Name=?, UserID=?, Status=?, CreationDate=?, ActivationDate=?, EditFlag=? WHERE ID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_id << refName << insert_user << insert_stat << insert_cdate << insert_adate << insert_edit << insert_id1;
+
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+        std::cout << "Data updated" << std::endl;
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Insert finished!\n";
+    return bRet;
+}
+
+bool searchJobs::update_editFlag(int jobID)
+{
+    if (!pDB)
+        return false;
+
+    int editO = val.toInt();
+    td::INT4 insert_editO(editO);
+
+    int newID = jobID;
+    td::INT4 insert_newID(newID);
+
+    int editN = 0;
+    td::INT4 insert_editN(editN);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE Jobs SET ID=?, EditFlag=? WHERE ID=?"));
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+
+    //bind params
+    params << insert_newID << insert_editN << insert_editO;
 
 
     if (!pStat->execute())
@@ -344,7 +488,7 @@ bool searchJobs::update_aDate(QDate adate)
     return bRet;
 }
 
-bool searchJobs::updateConsJob()
+bool searchJobs::updateConsJob(int newJ)
 {
     if (!pDB)
         return false;
@@ -352,9 +496,9 @@ bool searchJobs::updateConsJob()
     int id = jobID;
 
     td::INT4 insert_id(id);
-    td::INT4 insert_newId(0);
+    td::INT4 insert_newId(newJ);
 
-    updateJobCatalog();
+    updateJobCatalog(newJ);
 
     //start transaction log
     db::Transaction trans(pDB);
@@ -399,7 +543,7 @@ bool searchJobs::updateUnitJob()
         td::INT4 insert_id(id);
         td::INT4 insert_newId(0);
 
-        updateJobCatalog();
+        updateJobCatalog(0);
 
         //start transaction log
         db::Transaction trans(pDB);
@@ -444,7 +588,7 @@ bool searchJobs::updateMotorJob()
     td::INT4 insert_id(id);
     td::INT4 insert_newId(0);
 
-    updateJobCatalog();
+    updateJobCatalog(0);
 
     //start transaction log
     db::Transaction trans(pDB);
@@ -614,7 +758,7 @@ bool searchJobs::updateShuntResJob()
     return bRet;
 }
 
-bool searchJobs::updateJobCatalog()
+bool searchJobs::updateJobCatalog(int newJ)
 {
     if (!pDB)
         return false;
@@ -622,10 +766,13 @@ bool searchJobs::updateJobCatalog()
     int id = jobID;
 
     td::INT4 insert_id(id);
-    td::INT4 insert_newId(0);
+    td::INT4 insert_newId(newJ);
 
     //start transaction log
     db::Transaction trans(pDB);
+
+
+    update_activatedJob(newJ, "Ali", 2, 0, QDate::currentDate(), QDate::currentDate(), 0);
 
     //create statement using parameters which will be provided later
     db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE, "UPDATE JobCatalogs SET JobID=? WHERE JobID=?"));
@@ -784,7 +931,7 @@ void searchJobs::on_pushButton_clicked()
 
     if(aJob.exec()==QDialog::Accepted)
     {
-        update_job(aJob.name(),select_ownerID(aJob.ownerName()), aJob.status(),aJob.cdate(),aJob.adate());
+        update_job(val.toInt(), aJob.name(),select_ownerID(aJob.ownerName()), aJob.status(),aJob.cdate(),aJob.adate(), 0);
         select_jobs();
     }
 
@@ -795,7 +942,7 @@ void searchJobs::on_newJobPushButton_clicked()
     bool exst = false;
 
     newJob aJob(this);
-    aJob.setID("0");
+    aJob.setID();
     aJob.setName("New Job 1");
     aJob.setUser(select_user());
     aJob.setCDate();
@@ -817,7 +964,7 @@ void searchJobs::on_newJobPushButton_clicked()
 
         if(exst == false && aJob.id() != 0)
         {
-        insert_job(aJob.id(),aJob.name(),select_ownerID(aJob.ownerName()),aJob.status(),aJob.cdate(),aJob.adate());
+        insert_job(aJob.id(), aJob.name(),select_ownerID(aJob.ownerName()),aJob.status(),aJob.cdate(),aJob.adate(), 0);
         select_jobs();
         }
 
@@ -837,9 +984,16 @@ void searchJobs::on_newJobPushButton_clicked()
 
         else
         {
-            messageBox exist(0,this);
+            if(checkBox == false)
+            {
+            messageBox exist(2,this);
             exist.show();
-            exist.exec();
+            if(exist.exec() == QDialog::Accepted)
+            {
+                if(exist.checkBox == true)
+                checkBox = true;
+            }
+            }
         }
     }
 
@@ -856,25 +1010,24 @@ void searchJobs::on_tableView_clicked(const QModelIndex &index)
 
 void searchJobs::on_tableView_doubleClicked(const QModelIndex &index)
 {
-    select_jobsValues();
-    newJob aJob(this);
-    aJob.setEditID(QString::number(idVal));
-    aJob.setName(nameVal);
-    aJob.setUser(select_user());
-    aJob.setCDate();
-    aJob.setADate();
+    QDialog::accept();
+    int inx = index.row();
+    QModelIndex ind = ui->tableView->model()->index(inx,0);
+    ui->tableView->selectionModel()->select(index, QItemSelectionModel::Select);
+    val = ui->tableView->model()->data(ind).toString();
+    jobID = val.toInt();
+    this->close();
 
+}
 
-    if(aJob.exec()==QDialog::Accepted)
-    {
-        update_job(aJob.name(),select_ownerID(aJob.ownerName()), aJob.status(),aJob.cdate(),aJob.adate());
-        select_jobs();
-    }
+int searchJobs::setJobIDVal()
+{
+    return jobID;
 }
 
 void searchJobs::on_pushButton_5_clicked()
 {
-    browse brw (jobID, this);
+    browse brw (jobID, refUserJob, this);
     brw.show();
     brw.exec();
 }
@@ -882,13 +1035,38 @@ void searchJobs::on_pushButton_5_clicked()
 void searchJobs::on_pushButton_4_clicked()
 {
     update_status();
-    updateConsJob();
+    update_aDate(QDate::currentDate());
+
+    int max = 1;
+    for(int i = 0; i < ui->tableView->model()->rowCount(); i++)
+    {
+        QModelIndex idx = ui->tableView->model()->index(i,0);
+        int id = ui->tableView->model()->data(idx, Qt::DisplayRole).toInt();
+        if(id >= max)
+            max = id;
+    }
+
+    searchDialog edit;
+    edit.update_consJobIdEditFlag(jobID, max + 1);
+    edit.updateConsEditFlagAfterAct(jobID, max + 1);
+
+    edit.update_unitJobIdEditFlag(jobID, max + 1);
+    edit.updateUnitEditFlagAfterAct(jobID, max + 1);
+
+    edit.update_motorJobIdEditFlag(jobID, max + 1);
+    edit.updateMotorEditFlagAfterAct(jobID, max + 1);
+
+    edit.update_jobCatalogJobID(jobID, max + 1);
+
+    update_editFlag(max + 1);
+    /*updateConsJob(max + 1);
     updateUnitJob();
     updateMotorJob();
     updateMotorPlaJob();
     updateUnitPlacJob();
-    updateShuntResJob();
-    update_aDate(QDate::currentDate());
+    updateShuntResJob();*/
+
+
 
     select_jobs();
 

@@ -298,7 +298,7 @@ bool CapacitorBankPlacement::updateCapacitorBank(int ID, QString alias, QString 
 
     td::INT4 insert_NS(normalSection);
     td::INT4 insert_ID(ID);
-    td::INT4 insert_JobID(JobID);
+    td::INT4 insert_JobID(22);
     td::INT4 insert_SystemID(1);
     td::INT4 insert_TypeID(38);
 

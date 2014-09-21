@@ -146,73 +146,35 @@ void SearchWindowBankPlacement::on_cancel_pushButton_clicked()
 
 void SearchWindowBankPlacement::on_delete_pushButton_clicked()
 {
-    int row = ui->capacitor_tableView->selectionModel()->currentIndex().row();
-    searchwindowID = ui->capacitor_tableView->model()->index(row,0).data().toInt();
-    searchwindowJobID = ui->capacitor_tableView->model()->index(row,2).data().toInt();
-    //deleteFromJobs();
-    deleteCapacitorBank();
-    populateModel();
-}
-
-
-bool SearchWindowBankPlacement::deleteCapacitorBank()
-{
-
-    int row = ui->capacitor_tableView->selectionModel()->currentIndex().row();
-    searchwindowID = ui->capacitor_tableView->model()->index(row,0).data().toInt();
-    searchwindowJobID = ui->capacitor_tableView->model()->index(row,2).data().toInt();
-    if (!pDB)
-        return false;
-
-    char *a = "Delete from JobPlacements where JobID = ";
+    char *a = "Delete FROM CapacitorBankPlacement WHERE ID = ";
     char buff[10];
-    char *b = itoa(JobID,buff,10);
+    char *b = itoa(searchwindowID,buff,10);
     char *c = (char*)malloc(strlen(a)+strlen(b)+1);
+
     if(c != NULL)
     {
         strcpy(c,a);
-        strcpy(c,b);
+        strcat(c,b);
     }
-   pDB->execDirectly(c);
-   populateModel();
 
-}
-
-bool SearchWindowBankPlacement::deleteFromJobs()
-{
-    if (!pDB)
-        return false;
-
-    td::INT4 delete_searchwindowID(searchwindowID);
-    td::INT4 zero(0);
-
-    //start transaction log
-    db::Transaction trans(pDB);
-
-    //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
-       "UPDATE JobPlacements SET JobID = ? where CatID = ?"));
-
-    //allocate parameters and bind them to the statement
-    db::Params params(pStat->allocParams());
-    //bind params
-    params << zero << delete_searchwindowID;
+     pDB->execDirectly(c);
 
 
-    if (!pStat->execute())
+    char *d = "Delete FROM PlacementNaming WHERE ID = ";
+    char buff2[10];
+    char *e = itoa(searchwindowID,buff2,10);
+    char *f = (char*)malloc(strlen(d)+strlen(e)+1);
+    if(f != NULL)
     {
-        td::String strErr;
-        pStat->getErrorStr(strErr);
-        if (DebugTrace(1000))
-            mu::getTracer() << strErr;
-        //rollback will be called
-        return false;
+        strcpy(f,d);
+        strcat(f,e);
     }
 
-    //commit transaction
-    bool  bRet = trans.commit();
-    return bRet;
+    pDB->execDirectly(f);
+    populateModel();
+    ui->delete_pushButton->setEnabled(false);
 }
+
 
 void SearchWindowBankPlacement::on_capacitor_tableView_clicked(const QModelIndex &index)
 {
@@ -225,15 +187,16 @@ void SearchWindowBankPlacement::on_capacitor_tableView_clicked(const QModelIndex
 
 
      QModelIndex ind = ui->capacitor_tableView->model()->index(inx,2);
-
+     QModelIndex ind2 = ui->capacitor_tableView->model()->index(inx,0);
 
      ui->capacitor_tableView->selectionModel()->select(index, QItemSelectionModel::Select);
 
 
      QString val = ui->capacitor_tableView->model()->data(ind).toString();
-
+     QString a = ui->capacitor_tableView->model()->data(ind2).toString();
 
      searchwindowJobID = val.toInt();
+     searchwindowID = a.toInt();
 
      if(((searchwindowJobID != JobID) && (searchwindowJobID <= 0)) || (editable == false))
        {

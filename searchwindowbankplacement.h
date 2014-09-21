@@ -47,8 +47,7 @@ private:
     Ui::SearchWindowBankPlacement *ui;
     QSortFilterProxyModel *proxy;
     bool populateModel();
-    bool deleteCapacitorBank();
-    bool deleteFromJobs();
+
 };
 
 #endif // SEARCHWINDOWBANKPLACEMENT_H

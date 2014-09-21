@@ -218,7 +218,7 @@ bool Capacitor::updateCapacitor(int id, QString name, QString aliasName, float r
     td::INT4 insert_ID(id);
     td::INT4 insert_nominalSection(nominalSection);
     td::INT4 insert_TypeID(5);
-    td::INT4 insert_JobID(JobID);
+    td::INT4 insert_JobID(22);
 
     db::Ref<td::String> refName(50);
     db::Ref<td::String> refAliasName(50);

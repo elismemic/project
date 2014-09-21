@@ -126,6 +126,7 @@ void SearchWindowCapacitor::on_new_pushButton_clicked()
     Capacitor capacitor;
     capacitor.exec();
     populateModel();
+    ui->capacitor_tableView->selectRow(ui->capacitor_tableView->model()->rowCount()-1);
 
 }
 
@@ -139,6 +140,7 @@ void SearchWindowCapacitor::on_edit_pushButton_clicked()
     capacitor.exec();
     populateModel();
     ui->capacitor_tableView->selectRow(row);
+    ui->capacitor_tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 
@@ -149,51 +151,37 @@ void SearchWindowCapacitor::on_cancel_pushButton_clicked()
 
 void SearchWindowCapacitor::on_delete_pushButton_clicked()
 {
-    int row = ui->capacitor_tableView->selectionModel()->currentIndex().row();
-    searchwindowID = ui->capacitor_tableView->model()->index(row,0).data().toInt();
-    searchwindowJobID = ui->capacitor_tableView->model()->index(row,2).data().toInt();
-    deleteFromCapacitor();
-    deleteFromNaming();
+
+    char *a = "Delete FROM CatalogCapacitor WHERE ID = ";
+    char buff[10];
+    char *b = itoa(searchwindowID,buff,10);
+    char *c = (char*)malloc(strlen(a)+strlen(b)+1);
+
+    if(c != NULL)
+    {
+        strcpy(c,a);
+        strcat(c,b);
+    }
+
+     pDB->execDirectly(c);
+
+
+    char *d = "Delete FROM CatNaming WHERE ID = ";
+    char buff2[10];
+    char *e = itoa(searchwindowID,buff2,10);
+    char *f = (char*)malloc(strlen(d)+strlen(e)+1);
+    if(f != NULL)
+    {
+        strcpy(f,d);
+        strcat(f,e);
+    }
+
+    pDB->execDirectly(f);
     populateModel();
     ui->delete_pushButton->setEnabled(false);
 }
 
-bool SearchWindowCapacitor::deleteFromCapacitor()
-{
 
-    if (!pDB)
-        return false;
-
-    char *a = "Delete from CatalogCapacitor where ID = ";
-    char buff[10];
-    char *b = itoa(searchwindowID,buff,10);
-    char *c = (char*)malloc(strlen(a)+strlen(b)+1);
-    if(c != NULL)
-    {
-        strcpy(c,a);
-        strcpy(c,b);
-    }
-   pDB->execDirectly(c);
-   return true;
-}
-
-bool SearchWindowCapacitor::deleteFromNaming()
-{
-    if (!pDB)
-        return false;
-
-    char *a = "Delete from CatNaming where ID = ";
-    char buff[10];
-    char *b = itoa(searchwindowID,buff,10);
-    char *c = (char*)malloc(strlen(a)+strlen(b)+1);
-    if(c != NULL)
-    {
-        strcpy(c,a);
-        strcpy(c,b);
-    }
-   pDB->execDirectly(c);
-   return true;
-}
 
 void SearchWindowCapacitor::on_capacitor_tableView_clicked(const QModelIndex &index)
 {
@@ -207,15 +195,17 @@ void SearchWindowCapacitor::on_capacitor_tableView_clicked(const QModelIndex &in
 
 
      QModelIndex ind = ui->capacitor_tableView->model()->index(inx,2);
+     QModelIndex ind2 = ui->capacitor_tableView->model()->index(inx,0);
 
 
      ui->capacitor_tableView->selectionModel()->select(index, QItemSelectionModel::Select);
 
 
      QString val = ui->capacitor_tableView->model()->data(ind).toString();
-
+     QString a = ui->capacitor_tableView->model()->data(ind2).toString();
 
      searchwindowJobID = val.toInt();
+     searchwindowID = a.toInt();
 
      if(((searchwindowJobID != JobID) && (searchwindowJobID <= 0)) || (editable == false))
        {

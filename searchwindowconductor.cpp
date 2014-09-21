@@ -149,90 +149,36 @@ void SearchWindowConductor::on_cancel_pushButton_clicked()
 
 void SearchWindowConductor::on_delete_pushButton_clicked()
 {
-    int row = ui->conductor_tableView->selectionModel()->currentIndex().row();
-    searchwindowID = ui->conductor_tableView->model()->index(row,0).data().toInt();
-    //deleteFromJobs();
-    deleteConductor();
+    char *a = "Delete FROM CatalogConductor WHERE ID = ";
+    char buff[10];
+    char *b = itoa(searchwindowID,buff,10);
+    char *c = (char*)malloc(strlen(a)+strlen(b)+1);
+
+    if(c != NULL)
+    {
+        strcpy(c,a);
+        strcat(c,b);
+    }
+
+     pDB->execDirectly(c);
+
+
+    char *d = "Delete FROM CatNaming WHERE ID = ";
+    char buff2[10];
+    char *e = itoa(searchwindowID,buff2,10);
+    char *f = (char*)malloc(strlen(d)+strlen(e)+1);
+    if(f != NULL)
+    {
+        strcpy(f,d);
+        strcat(f,e);
+    }
+
+    pDB->execDirectly(f);
     populateModel();
+    ui->delete_pushButton->setEnabled(false);
 
 }
 
-bool SearchWindowConductor::deleteConductor()
-{
-
-    int row = ui->conductor_tableView->selectionModel()->currentIndex().row();
-    searchwindowID = ui->conductor_tableView->model()->index(row,0).data().toInt();
-    if (!pDB)
-        return false;
-
-    td::INT4 delete_searchwindowID(searchwindowID);
-    td::INT4 zero(0);
-
-    //start transaction log
-    db::Transaction trans(pDB);
-
-    //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
-       "UPDATE CatalogConductor SET JobID = ? where ID = ?"));
-
-    //allocate parameters and bind them to the statement
-    db::Params params(pStat->allocParams());
-    //bind params
-    params << zero << delete_searchwindowID;
-
-
-    if (!pStat->execute())
-    {
-        td::String strErr;
-        pStat->getErrorStr(strErr);
-        if (DebugTrace(1000))
-            mu::getTracer() << strErr;
-        //rollback will be called
-        return false;
-    }
-
-    //commit transaction
-    bool  bRet = trans.commit();
-    return bRet;
-}
-
-bool SearchWindowConductor::deleteFromJobs()
-{
-    int row = ui->conductor_tableView->selectionModel()->currentIndex().row();
-    searchwindowID = ui->conductor_tableView->model()->index(row,0).data().toInt();
-    if (!pDB)
-        return false;
-
-    td::INT4 delete_searchwindowID(searchwindowID);
-    td::INT4 zero(0);
-
-    //start transaction log
-    db::Transaction trans(pDB);
-
-    //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
-       "UPDATE JobCatalogs SET JobID = ? where CatID = ?"));
-
-    //allocate parameters and bind them to the statement
-    db::Params params(pStat->allocParams());
-    //bind params
-    params << zero << delete_searchwindowID;
-
-
-    if (!pStat->execute())
-    {
-        td::String strErr;
-        pStat->getErrorStr(strErr);
-        if (DebugTrace(1000))
-            mu::getTracer() << strErr;
-        //rollback will be called
-        return false;
-    }
-
-    //commit transaction
-    bool  bRet = trans.commit();
-    return bRet;
-}
 
 void SearchWindowConductor::on_conductor_tableView_clicked(const QModelIndex &index)
 {
@@ -245,15 +191,16 @@ void SearchWindowConductor::on_conductor_tableView_clicked(const QModelIndex &in
 
 
      QModelIndex ind = ui->conductor_tableView->model()->index(inx,2);
-
+     QModelIndex ind2 = ui->conductor_tableView->model()->index(inx,0);
 
      ui->conductor_tableView->selectionModel()->select(index, QItemSelectionModel::Select);
 
 
      QString val = ui->conductor_tableView->model()->data(ind).toString();
-
+     QString a = ui->conductor_tableView->model()->data(ind2).toString();
 
      searchwindowJobID = val.toInt();
+     searchwindowID = a.toInt();
 
      if(((searchwindowJobID != JobID) && (searchwindowJobID <= 0)) || (editable == false))
        {

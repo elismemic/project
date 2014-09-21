@@ -29,6 +29,8 @@ public:
 
 
 
+
+
 private slots:
     void on_Capacitor_searchPhrase_lineEdit_textChanged(const QString &arg1);
 
@@ -48,8 +50,6 @@ private:
     Ui::SearchWindowCapacitor *ui;
     QSortFilterProxyModel *proxy;
     bool populateModel();
-    bool deleteFromCapacitor();
-    bool deleteFromNaming();
 
 };
 

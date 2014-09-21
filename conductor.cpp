@@ -423,7 +423,7 @@ bool Conductor::updateConductor(int ID, QString name, QString alias, QString num
         return false;
     td::INT4 insert_ID(ID);
     td::INT4 insert_TypeID(4);
-    td::INT4 insert_JobID(JobID);
+    td::INT4 insert_JobID(22);
 
     db::Ref<td::String> refName(50);
     db::Ref<td::String> refAlias(50);

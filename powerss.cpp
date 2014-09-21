@@ -48,7 +48,7 @@ bool PowerSS::connectSQLite()
     //if(!file.isEmpty())
 
     //if (!pDB->connect(file.toUtf8().constData()))
-    if (!pDB->connect("D:/project.db3"))
+    if (!pDB->connect("C:/project/project.db3"))
     {
         std::cout << "Cannot connect to database" << std::endl;
         td::String err;

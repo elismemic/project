@@ -27,7 +27,7 @@ searchJobs::searchJobs(QWidget *parent) :
 
     select_jobs();
 
-    int lastItem = ui->tableView->model()->rowCount();
+     int lastItem = ui->tableView->model()->rowCount();
     if(lastItem >= 1)
     {
         ui->tableView->clicked(ui->tableView->model()->index(lastItem - 1, 0));

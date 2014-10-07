@@ -1,9 +1,10 @@
+
 #include "mymodel.h"
 #include <iostream>
-#include <QBrush>
-#include <QTableView>
-#include "db/Recordset.h"
 
+#include <QBrush>
+#include<QTableView>
+#include "db/Recordset.h"
 
 MyModel::MyModel(QObject *parent, db::Recordset *rs, bool stripe)
     :QAbstractTableModel(parent)
@@ -13,6 +14,7 @@ MyModel::MyModel(QObject *parent, db::Recordset *rs, bool stripe)
 {
     _backColor.setColor(203,233,242);
 }
+
 
 // mymodel.cpp
 QVariant MyModel::data(const QModelIndex &index, int role) const
@@ -27,6 +29,14 @@ QVariant MyModel::data(const QModelIndex &index, int role) const
             return QString::fromUtf8(_rs->getUTF8(row, col));
     }
         break;
+        /* case Qt::FontRole:
+        if (row ==_rowNo && col == _columnNo) //bold only for _rowNo and _columnNo
+        {
+            QFont boldFont;
+            boldFont.setBold(true);
+            return boldFont;
+        }
+        break;*/
     case Qt::TextAlignmentRole:
     {
         td::DataType colType = _rs->getColDesc()[col].tdType;
@@ -56,10 +66,11 @@ int MyModel::rowCount(const QModelIndex &parent) const
 {
     return _rs->rowCount();
 }
-
 int MyModel::columnCount(const QModelIndex &parent) const
 {
+
     return _rs->getColDesc().size();
+
 }
 
 QVariant MyModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -81,6 +92,7 @@ MyModel::~MyModel()
         delete _rs;
 }
 
+
 Qt::ItemFlags MyModel::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags theFlags = QAbstractTableModel::flags(index);
@@ -93,4 +105,5 @@ void MyModel::setStripeColor(td::Color color)
 {
    _backColor = color;
 }
+
 

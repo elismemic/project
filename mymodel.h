@@ -10,18 +10,25 @@ namespace db
 }
 
 class MyModel : public QAbstractTableModel
-{
 
+{
 private:
     db::Recordset *_rs;
     bool _rsOK;
     bool _stripe;
     td::Color _backColor;
     Q_OBJECT
-
 public:
     MyModel(QObject *parent, db::Recordset *rs, bool stripe = 0);
     ~MyModel();
+
+   /* template <size_t N>
+    bool setHeaderData(const char* (&array)[N]);
+
+    template <size_t N>
+    bool columnData(int i, int j, const char* (&array)[N]);
+
+    bool setAllignment();*/
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -30,7 +37,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const;
 
     void setStripeColor(td::Color color);
-
 
 };
 

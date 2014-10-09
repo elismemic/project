@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>389</width>
+    <height>137</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>389</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuUsers">
+    <property name="title">
+     <string>Users</string>
+    </property>
+    <addaction name="actionOpen_2"/>
+   </widget>
+   <widget class="QMenu" name="menuJobs">
+    <property name="title">
+     <string>Jobs</string>
+    </property>
+    <addaction name="actionOpen"/>
+   </widget>
+   <widget class="QMenu" name="menuCatalogs">
+    <property name="title">
+     <string>Catalogs</string>
+    </property>
+    <addaction name="actionConductor"/>
+    <addaction name="actionCapacitor"/>
+   </widget>
+   <widget class="QMenu" name="menuPlacements">
+    <property name="title">
+     <string>Placements</string>
+    </property>
+    <addaction name="actionCapPlac"/>
+   </widget>
+   <addaction name="menuUsers"/>
+   <addaction name="menuJobs"/>
+   <addaction name="menuCatalogs"/>
+   <addaction name="menuPlacements"/>
+  </widget>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionOpen_2">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionConductor">
+   <property name="text">
+    <string>Conductor</string>
+   </property>
+  </action>
+  <action name="actionCapPlac">
+   <property name="text">
+    <string>Capacitor Bank</string>
+   </property>
+  </action>
+  <action name="actionCapacitor">
+   <property name="text">
+    <string>Capacitor</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

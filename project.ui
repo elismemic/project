@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Project</class>
+ <widget class="QMainWindow" name="Project">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Project</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Job ID</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLineEdit" name="lineEdit"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>400</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuCatalogs">
+    <property name="title">
+     <string>Catalogs</string>
+    </property>
+    <addaction name="actionResistor"/>
+    <addaction name="actionReactor"/>
+   </widget>
+   <widget class="QMenu" name="menuPlacements">
+    <property name="title">
+     <string>Placements</string>
+    </property>
+    <addaction name="actionReactorBankPlacement"/>
+    <addaction name="actionResistorPlacement"/>
+   </widget>
+   <addaction name="menuCatalogs"/>
+   <addaction name="menuPlacements"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionResistor">
+   <property name="text">
+    <string>Resistor</string>
+   </property>
+  </action>
+  <action name="actionReactor">
+   <property name="text">
+    <string>Reactor</string>
+   </property>
+  </action>
+  <action name="actionReactorBankPlacement">
+   <property name="text">
+    <string>ReactorBankPlacement</string>
+   </property>
+  </action>
+  <action name="actionResistorPlacement">
+   <property name="text">
+    <string>ResistorPlacement</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

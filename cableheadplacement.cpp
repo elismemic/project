@@ -8,10 +8,12 @@
 #include "td/Variant.h"
 #include "mainwindow.h"
 #include "QMessageBox"
+#include "searchplacements.h"
 
 extern db::ISQLDatabase *pDB;
 extern int globalJobId;
 extern int sysId;
+extern int chosenJobId2;
 
 CableHeadPlacement::CableHeadPlacement(QWidget *parent) :
     QDialog(parent),
@@ -138,7 +140,7 @@ bool CableHeadPlacement::selectPhaseCode(){
 }
 
 
-bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobId)
+bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobId,int flag)
 {
 
     if (!pDB)
@@ -146,6 +148,7 @@ bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int 
 
     //td::INT4 td_type(type);
     td::INT4 td_uid(uid);
+    td::INT4 td_flag(flag);
     td::INT4 td_cattype(cattype);
     td::INT4 td_phasecode(phasecode);
     td::INT4 td_placementType(PlacementType);
@@ -167,7 +170,7 @@ bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int 
 
     //create statement using parameters which will be provided later
 
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?,?,?)"));
 
     //allocate parameters and bind them to the statement
 
@@ -175,7 +178,7 @@ bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType<<td_jobid;
+    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType<<td_jobid<<td_flag;
 
     if (!pStat->execute())
     {
@@ -217,13 +220,13 @@ void CableHeadPlacement::on_buttonBox_clicked(QAbstractButton *button)
 
     if(button->text() == "OK"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,catalogType,phaseCode,description,globalJobId);
-            insertPlacement(uid,PlacementType,globalJobId,sysId,sectionType);
+            insertNaming(uid, name, alias,catalogType,phaseCode,description,globalJobId,0);
+            insertPlacement(uid,PlacementType,globalJobId,sysId,sectionType,0);
             insertJobPlacements(sysId,globalJobId,PlacementType,uid);
             QMessageBox::information(this,"Status","Saved successfuly");
             this->close();
         }
-        else
+        else if (globalJobId==chosenJobId2)
             {
             updateNaming(uid, name, alias,catalogType,phaseCode,description);
             updatePlacement(uid, sectionType);
@@ -231,6 +234,11 @@ void CableHeadPlacement::on_buttonBox_clicked(QAbstractButton *button)
             QMessageBox::information(this,"Status","Update Successfully");
             this->close();
             }
+        else{
+            insertNaming(uid, name, alias,catalogType,phaseCode,description,globalJobId,chosenJobId2);;
+            insertPlacement(uid,PlacementType,globalJobId,sysId,sectionType,chosenJobId2);
+            this->close();
+        }
     }
     else if(button->text() == "Cancel")
         close();
@@ -453,7 +461,7 @@ void CableHeadPlacement::setPlacementType(int PlacementType)
     this->PlacementType = PlacementType;
 }
 
-bool CableHeadPlacement::insertPlacement(int id, int typeId,int jobId, int sysId, int sectype)
+bool CableHeadPlacement::insertPlacement(int id, int typeId,int jobId, int sysId, int sectype,int flag)
 {
 
     if (!pDB)
@@ -461,16 +469,17 @@ bool CableHeadPlacement::insertPlacement(int id, int typeId,int jobId, int sysId
 
 
     td::INT4 td_id(id);
+    td::INT4 td_flag(flag);
     td::INT4 td_jobId(jobId);
     td::INT4 td_sysId(sysId);
     td::INT4 td_typeId(typeId);
     td::INT4 td_sectype(sectype);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacCableHead(Id,TypeId,JobId,SystemId,SectionType,EditFlag) values(?,?,?,?,?,0)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacCableHead(Id,TypeId,JobId,SystemId,SectionType,EditFlag) values(?,?,?,?,?,?)"));
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_id<<td_typeId<<td_jobId<<td_sysId<<td_sectype;
+    params <<td_id<<td_typeId<<td_jobId<<td_sysId<<td_sectype<<td_flag;
 
     if (!pStat->execute())
     {
@@ -513,7 +522,7 @@ bool CableHeadPlacement::deleteNaming(int uid){
     //bool bRet = pDB->execDirectly("DELETE FROM test_tab2");
 
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM PlacNaming where Id = ? and TypeId = ?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"UPDATE PlacNaming SET EditFlag=1 where Id = ? and TypeId = ?"));
 
     db::Params params(pStat->allocParams());
         params << uid<< PlacementType;
@@ -614,4 +623,18 @@ bool CableHeadPlacement::insertJobPlacements(int sysId,int jobId,int typeId, int
         mu::getTracer() << "Insert finished!\n";
 
     return bRet;
+}
+
+
+void CableHeadPlacement::disableButtons() {
+        ui->lineEdit_sysid->setEnabled(false);
+        ui->lineEdit_alias->setEnabled(false);
+        ui->lineEdit_name->setEnabled(false);
+        ui->lineEdit_uid->setEnabled(false);
+        ui->comboBox_bussec->setEnabled(false);
+        ui->comboBox_cattype->setEnabled(false);
+        ui->comboBox_phasecode->setEnabled(false);
+        ui->buttonBox->setEnabled(false);
+        ui->textEdit_decr->setEnabled(false);
+
 }

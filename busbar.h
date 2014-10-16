@@ -24,6 +24,7 @@ public:
     bool deleteJobCatalogs(int uid);
     bool checkFlag(int uid);
     void checkJob();
+    void disableButtons();
 
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
@@ -35,9 +36,9 @@ private:
 
     bool insertJobCatalogs(int jobId,int typeId, int catId);
     bool updateJobCatalogs(int jobId, int typeId, int catId);
-    bool insertNaming(int uid, QString name, QString alias, int voltage, QString description,int job);
+    bool insertNaming(int uid, QString name, QString alias, int voltage, QString description,int job,int flag);
     bool updateNaming(int uid, QString name, QString alias, int voltage, QString description);
-    bool insertCatalog(int id, int typeId);
+    bool insertCatalog(int id, int typeId, int flag);
     bool selectVoltage();
     bool uidExist(QString uid);
     bool updateForm(int uid);

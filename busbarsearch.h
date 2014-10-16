@@ -51,6 +51,7 @@ private:
     void disableButtons();
     bool selectPlacement();
     void selectType();
+    int getChosenJobId(int job);
 
 };
 

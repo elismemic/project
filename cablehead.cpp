@@ -7,9 +7,11 @@
 #include "mu/TxtOutFile.h"
 #include "DebugTrace.h"
 #include "mainwindow.h"
+#include "busbarsearch.h"
 
 extern db::ISQLDatabase *pDB;
 extern int globalJobId;
+extern int chosenJobId;
 
 CableHead::CableHead(QWidget *parent) :
     QDialog(parent),
@@ -43,7 +45,7 @@ void CableHead::checkJob() {
     }
 }
 
-bool CableHead::insertCatalog(int id, int typeId)
+bool CableHead::insertCatalog(int id, int typeId,int flag)
 {
 
     if (!pDB)
@@ -51,14 +53,15 @@ bool CableHead::insertCatalog(int id, int typeId)
 
 
     td::INT4 td_id(id);
+    td::INT4 td_flag(flag);
     td::INT4 td_typeId(typeId);
     td::INT4 td_jobId(globalJobId);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatCableHead(Id,TypeId,JobId,EditFlag) values(?,?,?,0)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatCableHead(Id,TypeId,JobId,EditFlag) values(?,?,?,?)"));
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_id<<td_typeId<<td_jobId;
+    params <<td_id<<td_typeId<<td_jobId<<td_flag;
 
     if (!pStat->execute())
     {
@@ -85,13 +88,15 @@ bool CableHead::insertCatalog(int id, int typeId)
 
 
 
-bool CableHead::insertNaming(int uid, QString name, QString alias, int voltage, QString description,int jobId)
+
+bool CableHead::insertNaming(int uid, QString name, QString alias, int voltage, QString description,int jobId,int flag)
 {
 
     if (!pDB)
         return false;
 
     td::INT4 td_uid(uid);
+    td::INT4 td_flag(flag);
     td::INT4 td_job(jobId);
     //td::INT4 td_typeid(typeId);
     td::INT4 td_voltage(voltage);
@@ -112,13 +117,13 @@ bool CableHead::insertNaming(int uid, QString name, QString alias, int voltage, 
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,12,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,12,?,?)"));
 
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params << td_uid << refName << refAlias <<td_voltage <<refDescription<<td_job;
+    params << td_uid << refName << refAlias <<td_voltage <<refDescription<<td_job<<td_flag;
 
     if (!pStat->execute())
     {
@@ -216,29 +221,28 @@ void CableHead::on_buttonBox_clicked(QAbstractButton *button){
 
     if(button->text() == "Save"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId);
-            insertCatalog(uid,12);
+            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId,0);
+            insertCatalog(uid,12,0);
             insertJobCatalogs(globalJobId,12,uid);
             std::cout<<"insert called"<<std::endl;
             this->close();
-        }else{
+        }else if (globalJobId==chosenJobId){
             updateNaming(uid,name, alias,ratedVoltage,description);
             updateJobCatalogs(globalJobId,12,uid);
             //updateCatalog(uid,12);
             std::cout<<"updating databse"<<std::endl;
             this->close();
         }
+        else{
+            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId,chosenJobId);
+            insertCatalog(uid,12,chosenJobId);
+            this->close();
+        }
     }
 
     else if(button->text() == "Cancel")
         close();
-    else if(button->text() == "Discard")
-        if(uid>=0){
-            deleteCatalog(uid);
-            deleteNaming(uid);
-            deleteJobCatalogs(uid);
-            this->close();
-        }
+
 }
 
 bool CableHead::uidExist(QString uid){
@@ -385,7 +389,7 @@ bool CableHead::deleteNaming(int uid){
 
     //bool bRet = pDB->execDirectly("DELETE FROM test_tab2");
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM CatNaming where Id = ? and TypeId = 12"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"UPDATE CatNaming SET EditFlag=1 where Id = ? and TypeId = 12"));
 
     db::Params params(pStat->allocParams());
         params << uid;
@@ -522,4 +526,14 @@ bool CableHead::deleteJobCatalogs(int uid){
         std::cout<<"Could not Delete"<<std::endl;
 
     return false;
+}
+
+void CableHead::disableButtons()
+{
+    ui->lineEditAlias->setEnabled(false);
+    ui->lineEditName->setEnabled(false);
+    ui->lineEditUid->setEnabled(false);
+    ui->comboBoxRatedVoltage->setEnabled(false);
+    ui->textEditDescription->setEnabled(false);
+    ui->buttonBox->setEnabled(false);
 }

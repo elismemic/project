@@ -8,8 +8,11 @@
 #include "DebugTrace.h"
 #include "mainwindow.h"
 #include "QMessageBox"
+#include "busbarsearch.h"
+
 extern db::ISQLDatabase *pDB;
 extern int globalJobId;
+extern int chosenJobId;
 
 Busbar::Busbar(QWidget *parent) :
     QDialog(parent),
@@ -42,7 +45,7 @@ void Busbar::checkJob() {
     }
 }
 
-bool Busbar::insertCatalog(int id, int typeId)
+bool Busbar::insertCatalog(int id, int typeId,int flag)
 {
 
     if (!pDB)
@@ -50,14 +53,15 @@ bool Busbar::insertCatalog(int id, int typeId)
 
 
     td::INT4 td_id(id);
+    td::INT4 td_flag(flag);
     td::INT4 td_typeId(typeId);
     td::INT4 td_jobId(globalJobId);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatBusbar(Id,TypeId,JobId,EditFlag) values(?,?,?,0)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatBusbar(Id,TypeId,JobId,EditFlag) values(?,?,?,?)"));
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_id<<td_typeId<<td_jobId;
+    params <<td_id<<td_typeId<<td_jobId<<td_flag;
 
     if (!pStat->execute())
     {
@@ -84,13 +88,14 @@ bool Busbar::insertCatalog(int id, int typeId)
 
 
 
-bool Busbar::insertNaming(int uid, QString name, QString alias, int voltage, QString description,int jobId)
+bool Busbar::insertNaming(int uid, QString name, QString alias, int voltage, QString description,int jobId,int flag)
 {
 
     if (!pDB)
         return false;
 
     td::INT4 td_uid(uid);
+    td::INT4 td_flag(flag);
     td::INT4 td_job(jobId);
     //td::INT4 td_typeid(typeId);
     td::INT4 td_voltage(voltage);
@@ -111,13 +116,13 @@ bool Busbar::insertNaming(int uid, QString name, QString alias, int voltage, QSt
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,11,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,11,?,?)"));
 
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params << td_uid << refName << refAlias <<td_voltage <<refDescription<<td_job;
+    params << td_uid << refName << refAlias <<td_voltage <<refDescription<<td_job<<td_flag;
 
     if (!pStat->execute())
     {
@@ -215,17 +220,22 @@ void Busbar::on_buttonBox_clicked(QAbstractButton *button){
 
     if(button->text() == "Save"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId);
-            insertCatalog(uid,11);
+            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId,0);
+            insertCatalog(uid,11,0);
             insertJobCatalogs(globalJobId,11,uid);
             std::cout<<"insert called"<<std::endl;
             this->close();
-        }else{
+        }else if(globalJobId==chosenJobId){
             updateNaming(uid,name, alias,ratedVoltage,description);
             updateJobCatalogs(globalJobId,11,uid);
             checkFlag(uid);
             //updateCatalog(uid,11);
             std::cout<<"updating databse"<<std::endl;
+            this->close();
+        }
+        else{
+            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId,chosenJobId);
+            insertCatalog(uid,11,chosenJobId);
             this->close();
         }
     }
@@ -239,21 +249,7 @@ void Busbar::on_buttonBox_clicked(QAbstractButton *button){
             close();
         }
         }
-    else if(button->text() == "Discard"){
-        QMessageBox::StandardButton reply2;
-        reply2 = QMessageBox::question(this,"Discard","Are you sure you want to discard this item?",
-                              QMessageBox::Yes | QMessageBox::No);
-        if(reply2 == QMessageBox::Yes)
-        {
-        if(uid>=0){
-            deleteCatalog(uid);
-            deleteNaming(uid);
-            deleteJobCatalogs(uid);
-            this->close();
-        }
-        }
 
-}
     }
 
 bool Busbar::updateJobCatalogs(int jobId, int typeId, int catId){
@@ -474,7 +470,7 @@ bool Busbar::deleteNaming(int uid){
 
     td::INT4 Uid(uid);
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM CatNaming where Id = ? and TypeId = 11"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"UPDATE CatNaming SET EditFlag=1 where Id = ? and TypeId = 11"));
 
     db::Params params(pStat->allocParams());
         params << Uid;
@@ -551,4 +547,15 @@ bool Busbar::checkFlag(int uid)
             std::cout<<"Could not Update"<<std::endl;
 
         return false;
+}
+
+
+void Busbar::disableButtons()
+{
+    ui->lineEditAlias->setEnabled(false);
+    ui->lineEditName->setEnabled(false);
+    ui->lineEditUid->setEnabled(false);
+    ui->comboBoxRatedVoltage->setEnabled(false);
+    ui->textEditDescription->setEnabled(false);
+    ui->buttonBox->setEnabled(false);
 }

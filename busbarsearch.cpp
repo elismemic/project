@@ -12,8 +12,11 @@
 #include "busbar.h"
 #include <QAbstractItemModel>
 #include "mainwindow.h"
+#include "QMessageBox"
 
 extern int globalJobId;
+extern int chosenJobId=0;
+
 extern db::ISQLDatabase *pDB;
 
 
@@ -50,7 +53,7 @@ void BusbarSearch::disableButtons(){
 
 void BusbarSearch::checkJob() {
     if(globalJobId>0){
-        ui->pushButton_new->setEnabled(true);
+        ui->pushButton_new->setEnabled(false);
         ui->pushButton_delete->setEnabled(false);
     }
 }
@@ -82,11 +85,50 @@ void BusbarSearch::on_comboBox_type_currentIndexChanged(int index)
     }
 }
 
+int BusbarSearch::getChosenJobId(int job)
+{
+    chosenJobId=job;
+    return chosenJobId;
+}
+
 void BusbarSearch::on_pushButton_edit_clicked()
 {
     int row = ui->tableView->selectionModel()->currentIndex().row();
     QString uid = model->index(row, 0).data().toString();
+    QString jobid = model->index(row, 5).data().toString();
+    getChosenJobId(jobid.toInt());
 
+    if(jobid.toInt()<0 && jobid.toInt()!=globalJobId){
+        QMessageBox::information(this,"Authority info","Can not edit");
+        Busbar busbar;
+        CableHead cableHead;
+        Junction junction;
+
+        if(catalogType == 1){
+            busbar.setUid(uid.toInt());
+            busbar.enableUid(false);
+            busbar.checkJob();
+            busbar.disableButtons();
+            busbar.exec();
+        }
+        if(catalogType == 2){
+            cableHead.setUid(uid.toInt());
+            cableHead.enableUid(false);
+            cableHead.checkJob();
+            cableHead.disableButtons();
+            cableHead.exec();
+        }
+        if(catalogType == 3){
+            junction.setUid(uid.toInt());
+            junction.enableUid(false);
+            junction.checkJob();
+            junction.disableButtons();
+            junction.exec();
+        }
+    }
+
+    else
+    {
     Busbar busbar;
     CableHead cableHead;
     Junction junction;
@@ -111,7 +153,7 @@ void BusbarSearch::on_pushButton_edit_clicked()
     }
 
 }
-
+}
 
 
 bool BusbarSearch::selectCatalogs(int type)
@@ -133,16 +175,17 @@ bool BusbarSearch::selectCatalogs(int type)
 
     db::Ref<td::String> refSearchme(20);
     td::String td_searchMe = searchMe.toUtf8();
+    //td::INT4 td_jobId;
 
     refSearchme = td_searchMe;
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "select CatNaming.Id, CatNaming.Name, Alias_Name, rated_voltage.Name as Rated_Voltage, CatNaming.Description from CatNaming inner join rated_voltage on CatNaming.Rated_Voltage = rated_voltage.Id  where (CatNaming.Id = ? or CatNaming.Name LIKE ? or Alias_Name LIKE ? or CatNaming.Rated_Voltage = ?) and TypeId = ? "));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "select CatNaming.Id, CatNaming.Name, Alias_Name, rated_voltage.Name as Rated_Voltage, CatNaming.Description, CatNaming.JobId from CatNaming inner join rated_voltage on CatNaming.Rated_Voltage = rated_voltage.Id  where (CatNaming.Id = ? or CatNaming.Name LIKE ? or Alias_Name LIKE ? or CatNaming.Rated_Voltage = ?) and TypeId = ? "));
     db::Params params(pStat->allocParams());
 
     params <<refSearchme<<refSearchme<<refSearchme<<searchMeRatedVoltage<<type;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(5);
+        columns.reserve(6);
 
         columns[0].name = "Id";
         columns[0].tdType = td::int4;
@@ -164,6 +207,15 @@ bool BusbarSearch::selectCatalogs(int type)
         columns[4].tdType = td::nch;
         columns[4].len = 0;
 
+        columns[5].name = "JobId";
+        columns[5].tdType = td::int4;
+        columns[5].len = 0;
+
+       // db::Columns cols(pStat->allocBindColumns(1));
+           // cols << "JobId" << td_jobId;
+
+
+
 
         db::Recordset* rs = new db::Recordset(columns);
 
@@ -176,6 +228,8 @@ bool BusbarSearch::selectCatalogs(int type)
             enableButtons();
         else
             disableButtons();
+
+
 
         checkJob();
         model = new MyModel(this, rs, true);
@@ -240,6 +294,12 @@ void BusbarSearch::on_pushButton_clicked()
 
 void BusbarSearch::on_pushButton_new_clicked()
 {
+
+    if(globalJobId>0)
+        QMessageBox::information(this,"Authority info","Job is activated");
+
+else{
+
     Busbar busbar;
     CableHead cableHead;
     Junction junction;
@@ -260,6 +320,7 @@ void BusbarSearch::on_pushButton_new_clicked()
         junction.exec();
     }
 }
+    }
 
 void BusbarSearch::on_lineEdit_search_textChanged()
 {
@@ -285,6 +346,15 @@ void BusbarSearch::on_pushButton_delete_clicked()
 {
     int row = ui->tableView->selectionModel()->currentIndex().row();
     int uid = model->index(row, 0).data().toString().toInt();
+    QString jobid = model->index(row, 5).data().toString();
+
+    if(jobid.toInt()<0 && jobid.toInt()!=globalJobId){
+
+        QMessageBox::information(this,"Authority info","Can not delete");
+
+        ui->lineEdit_search->setText("");
+    }
+    else{
 
     Busbar busbar;
     CableHead cableHead;
@@ -296,14 +366,15 @@ void BusbarSearch::on_pushButton_delete_clicked()
     }
     else if(catalogType == 2){
         cableHead.deleteCatalog(uid);
-        cableHead.deleteNaming(uid);
+        //cableHead.deleteNaming(uid);
     }
     else if(catalogType == 3){
         junction.deleteCatalog(uid);
-        junction.deleteNaming(uid);
+        //junction.deleteNaming(uid);
     }
 
     ui->lineEdit_search->setText("");
 }
+    }
 
 

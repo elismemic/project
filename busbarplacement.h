@@ -29,6 +29,7 @@ public:
     bool deletePlacement(int uid);
     void setWindowName();
     void checkJob();
+    void disableButtons();
 
 private slots:
 
@@ -44,13 +45,13 @@ private:
     bool uidExist(QString uid);
     bool updateJobPlacements(int sysId, int jobId, int typeId, int placId);
     bool insertJobPlacements(int sysId, int jobId, int typeId, int placId);
-    bool insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobid);//
+    bool insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobid,int flag);//
     bool updateNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description);//
     bool updatePlacement(int uid, int sectionType);
     bool selectPhaseCode();
     bool selectSectionType();
     bool selectCatType();
-    bool insertPlacement(int id, int typeId, int jobId, int sysId, int secType);
+    bool insertPlacement(int id, int typeId, int jobId, int sysId, int secType, int flag);
 };
 
 

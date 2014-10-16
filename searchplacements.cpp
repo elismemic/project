@@ -14,9 +14,12 @@
 #include "busbarplacement.h"
 #include "cableheadplacement.h"
 #include "junctionplacement.h"
+#include "QMessageBox"
 
 extern db::ISQLDatabase *pDB;
 extern int globalJobId;
+extern int chosenJobId2=0;
+
 SearchPlacements::SearchPlacements(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SearchPlacements)
@@ -93,6 +96,48 @@ void SearchPlacements::on_pushButton_edit_clicked()
 {
     int row = ui->tableView->selectionModel()->currentIndex().row();
     QString uid = model->index(row, 0).data().toString();
+    QString jobid = model->index(row, 5).data().toString();
+
+    getChosenJobId2(jobid.toInt());
+
+    if(jobid.toInt()<0 && jobid.toInt()!=globalJobId){
+        QMessageBox::information(this,"Authority info","Can not edit");
+        BusbarPlacement busbar;
+        CableHeadPlacement cableHead;
+        JunctionPlacement junction;
+
+        if(catalogType == 1){
+            busbar.setUid(uid.toInt());
+            busbar.setPlacementType(this->placementType);
+            busbar.updateForm(uid.toInt());
+            busbar.enableUid(false);
+            busbar.setWindowName();
+            busbar.checkJob();
+            busbar.disableButtons();
+            busbar.exec();
+        }
+
+        if(catalogType == 2){
+            cableHead.setUid(uid.toInt());
+            cableHead.setPlacementType(this->placementType);
+            cableHead.updateForm(uid.toInt());
+            cableHead.enableUid(false);
+            cableHead.setWindowName();
+            cableHead.disableButtons();
+            cableHead.exec();
+        }
+
+        if(catalogType == 3){
+            junction.setUid(uid.toInt());
+            junction.setPlacementType(this->placementType);
+            junction.updateForm(uid.toInt());
+            junction.enableUid(false);
+            junction.setWindowName();
+            junction.disableButtons();
+            junction.exec();
+        }
+        }
+    else {
 
     BusbarPlacement busbar;
     CableHeadPlacement cableHead;
@@ -114,6 +159,7 @@ void SearchPlacements::on_pushButton_edit_clicked()
         cableHead.updateForm(uid.toInt());
         cableHead.enableUid(false);
         cableHead.setWindowName();
+        cableHead.checkJob();
         cableHead.exec();
     }
 
@@ -123,9 +169,12 @@ void SearchPlacements::on_pushButton_edit_clicked()
         junction.updateForm(uid.toInt());
         junction.enableUid(false);
         junction.setWindowName();
+        junction.checkJob();
         junction.exec();
     }
 
+
+}
 
 }
 
@@ -216,7 +265,7 @@ bool SearchPlacements::selectPlacement()
 
     td::INT4 td_PlacementType(this->placementType);
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "select PlacNaming.Id, PlacNaming.Name, Alias_Name, phase_code.Name as Phase_Code, PlacNaming.Description from PlacNaming inner join phase_code on PlacNaming.Phase_Code = phase_code.Id  where (PlacNaming.Id LIKE ? or PlacNaming.Alias_Name LIKE ? or PlacNaming.Name LIKE ? or Phase_Code = ?) and TypeId = ?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "select PlacNaming.Id, PlacNaming.Name, Alias_Name, phase_code.Name as Phase_Code, PlacNaming.Description, PlacNaming.JobId from PlacNaming inner join phase_code on PlacNaming.Phase_Code = phase_code.Id  where (PlacNaming.Id LIKE ? or PlacNaming.Alias_Name LIKE ? or PlacNaming.Name LIKE ? or Phase_Code = ?) and TypeId = ?"));
     db::Params params(pStat->allocParams());
 
 
@@ -228,7 +277,7 @@ bool SearchPlacements::selectPlacement()
     params <<refSearchme<<refSearchme<<refSearchme<<phase_code<<td_PlacementType;;
 
     cnt::SafeFullVector<db::CPPColumnDesc> columns;
-        columns.reserve(5);
+        columns.reserve(6);
 
         columns[0].name = "Id";
         columns[0].tdType = td::int4;
@@ -249,6 +298,11 @@ bool SearchPlacements::selectPlacement()
         columns[4].name = "Description";
         columns[4].tdType = td::nch;
         columns[4].len = 0;
+
+        columns[5].name = "JobId";
+        columns[5].tdType = td::int4;
+        columns[5].len = 0;
+
 
 
 
@@ -295,6 +349,12 @@ void SearchPlacements::on_pushButton_clicked()
 
 void SearchPlacements::on_pushButton_new_clicked()
 {
+
+    if(globalJobId>0)
+        QMessageBox::information(this,"Authority info","Job is activated");
+
+else{
+
     BusbarPlacement busbar;
     CableHeadPlacement cableHead;
     JunctionPlacement junction;
@@ -318,12 +378,21 @@ void SearchPlacements::on_pushButton_new_clicked()
         junction.exec();
     }
 }
+    }
 
 void SearchPlacements::on_pushButton_delete_clicked()
 {
     int row = ui->tableView->selectionModel()->currentIndex().row();
     QString uid = model->index(row, 0).data().toString();
+    QString jobid = model->index(row, 5).data().toString();
 
+    if(jobid.toInt()<0 && jobid.toInt()!=globalJobId){
+
+        QMessageBox::information(this,"Authority info","Can not delete");
+
+        }
+
+    else{
     BusbarPlacement busbar;
     CableHeadPlacement cableHead;
     JunctionPlacement junction;
@@ -354,10 +423,18 @@ void SearchPlacements::on_pushButton_delete_clicked()
         ui->lineEdit_search->setText("");
     }
 }
+    }
 
 
 
 void SearchPlacements::on_lineEdit_search_textChanged()
 {
     selectPlacement();
+}
+
+
+int SearchPlacements::getChosenJobId2(int job)
+{
+    chosenJobId2=job;
+    return chosenJobId2;
 }

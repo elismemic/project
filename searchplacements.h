@@ -58,6 +58,7 @@ private:
     void enableButtons();
     void disableButtons();
     void selectType();
+    int getChosenJobId2(int job);
 };
 
 #endif // SEARCHPLACEMENTS_H

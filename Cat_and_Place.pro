@@ -21,13 +21,13 @@ TRANSLATIONS += translationEn.ts
 
 CODECFORTR = UTF-8
 
-LIBS += -LC:/Users/darko/Desktop/SEPRO/cpp/DB_Libs -lmyUtilsD
-LIBS += -LC:/Users/darko/Desktop/SEPRO/cpp/DB_Libs -lSQLDatabaseD
-LIBS += -LC:/Users/darko/Desktop/SEPRO/cpp/boost/bin
+LIBS += -LC:\cpp\DB_Libs -lmyUtilsD
+LIBS += -LC:\cpp\DB_Libs -lSQLDatabaseD
 
+LIBS += -LC:\cpp\boost\bin
 
-INCLUDEPATH += C:/Users/darko/Desktop/SEPRO/cpp/DB_Includes
-INCLUDEPATH += C:/Users/darko/Desktop/SEPRO/cpp/boost/include
+INCLUDEPATH += C:\cpp\DB_Includes
+INCLUDEPATH += C:\cpp\boost\include
 
 
 

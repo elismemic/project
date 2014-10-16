@@ -22,6 +22,7 @@ public:
     bool deleteNaming(int uid);
     bool deleteCatalog(int uid);
     bool deleteJobCatalogs(int uid);
+    bool checkFlag(int uid);
     void checkJob();
 
 private slots:
@@ -34,8 +35,7 @@ private:
 
     bool insertJobCatalogs(int jobId,int typeId, int catId);
     bool updateJobCatalogs(int jobId, int typeId, int catId);
-    bool updateCatalog(int id, int typeId);
-    bool insertNaming(int uid, QString name, QString alias, int voltage, QString description);
+    bool insertNaming(int uid, QString name, QString alias, int voltage, QString description,int job);
     bool updateNaming(int uid, QString name, QString alias, int voltage, QString description);
     bool insertCatalog(int id, int typeId);
     bool selectVoltage();

@@ -50,7 +50,7 @@ void BusbarSearch::disableButtons(){
 
 void BusbarSearch::checkJob() {
     if(globalJobId>0){
-        ui->pushButton_new->setEnabled(false);
+        ui->pushButton_new->setEnabled(true);
         ui->pushButton_delete->setEnabled(false);
     }
 }
@@ -128,14 +128,15 @@ bool BusbarSearch::selectCatalogs(int type)
     if(ui->comboBox_type->currentIndex() != 3)
         searchMeRatedVoltage = -3;
     else{
-        searchMe.append("yxqwxx%");
+        searchMe.append("%");
     }
 
     db::Ref<td::String> refSearchme(20);
     td::String td_searchMe = searchMe.toUtf8();
+
     refSearchme = td_searchMe;
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "select CatNaming.Id, CatNaming.Name, Alias_Name, rated_voltage.Name as Rated_Voltage, CatNaming.Description from CatNaming inner join rated_voltage on CatNaming.Rated_Voltage = rated_voltage.Id  where (CatNaming.Id = ? or CatNaming.Name LIKE ? or Alias_Name LIKE ? or CatNaming.Rated_Voltage = ?) and TypeId = ?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT, "select CatNaming.Id, CatNaming.Name, Alias_Name, rated_voltage.Name as Rated_Voltage, CatNaming.Description from CatNaming inner join rated_voltage on CatNaming.Rated_Voltage = rated_voltage.Id  where (CatNaming.Id = ? or CatNaming.Name LIKE ? or Alias_Name LIKE ? or CatNaming.Rated_Voltage = ?) and TypeId = ? "));
     db::Params params(pStat->allocParams());
 
     params <<refSearchme<<refSearchme<<refSearchme<<searchMeRatedVoltage<<type;
@@ -291,7 +292,7 @@ void BusbarSearch::on_pushButton_delete_clicked()
 
     if(catalogType == 1){
         busbar.deleteCatalog(uid);
-        busbar.deleteNaming(uid);
+        //busbar.deleteNaming(uid);
     }
     else if(catalogType == 2){
         cableHead.deleteCatalog(uid);

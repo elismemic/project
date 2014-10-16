@@ -54,7 +54,7 @@ bool Busbar::insertCatalog(int id, int typeId)
     td::INT4 td_jobId(globalJobId);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatBusbar(Id,TypeId,JobId) values(?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatBusbar(Id,TypeId,JobId,EditFlag) values(?,?,?,0)"));
     db::Params params(pStat->allocParams());
     //bind params
     params <<td_id<<td_typeId<<td_jobId;
@@ -82,55 +82,16 @@ bool Busbar::insertCatalog(int id, int typeId)
     return bRet;
 }
 
-/*bool Busbar::updateCatalog(int id, int typeId)
-{
-
-    if (!pDB)
-        return false;
 
 
-    td::INT4 td_id(id);
-    td::INT4 td_typeId(typeId);
-
-
-    db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "UPDATE CatBusbar set Name = ? where Name = ? "));
-    db::Params params(pStat->allocParams());
-    //bind params
-    params <<refName<<refOldName;
-
-    if (!pStat->execute())
-    {
-        td::String strErr;
-        pStat->getErrorStr(strErr);
-        if (DebugTrace(1000))
-            mu::getTracer() << strErr;
-        //rollback will be called
-        return false;
-    }
-
-
-
-    //commit transaction
-    bool  bRet = trans.commit();
-    if (bRet)
-        std::cout << "Data inserted" << std::endl;
-
-    if (DebugTrace(1000))
-        mu::getTracer() << "Insert finished!\n";
-
-    return bRet;
-}
-
-*/
-
-bool Busbar::insertNaming(int uid, QString name, QString alias, int voltage, QString description)
+bool Busbar::insertNaming(int uid, QString name, QString alias, int voltage, QString description,int jobId)
 {
 
     if (!pDB)
         return false;
 
     td::INT4 td_uid(uid);
+    td::INT4 td_job(jobId);
     //td::INT4 td_typeid(typeId);
     td::INT4 td_voltage(voltage);
 
@@ -150,13 +111,13 @@ bool Busbar::insertNaming(int uid, QString name, QString alias, int voltage, QSt
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,11)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,11,?)"));
 
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params << td_uid << refName << refAlias <<td_voltage <<refDescription;
+    params << td_uid << refName << refAlias <<td_voltage <<refDescription<<td_job;
 
     if (!pStat->execute())
     {
@@ -254,7 +215,7 @@ void Busbar::on_buttonBox_clicked(QAbstractButton *button){
 
     if(button->text() == "Save"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,ratedVoltage,description);
+            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId);
             insertCatalog(uid,11);
             insertJobCatalogs(globalJobId,11,uid);
             std::cout<<"insert called"<<std::endl;
@@ -262,6 +223,7 @@ void Busbar::on_buttonBox_clicked(QAbstractButton *button){
         }else{
             updateNaming(uid,name, alias,ratedVoltage,description);
             updateJobCatalogs(globalJobId,11,uid);
+            checkFlag(uid);
             //updateCatalog(uid,11);
             std::cout<<"updating databse"<<std::endl;
             this->close();
@@ -530,7 +492,7 @@ bool Busbar::deleteCatalog(int uid){
 
     td::INT4 Uid(uid);
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM CatBusbar where Id = ?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"Update CatBusbar SET EditFlag=1 where Id = ?"));
 
     db::Params params(pStat->allocParams());
         params << Uid;
@@ -571,4 +533,22 @@ void Busbar::on_lineEditUid_textChanged(const QString &arg1)
     int id = ui->lineEditUid->text().toInt();
     updateForm(id);
     }
+}
+
+bool Busbar::checkFlag(int uid)
+{
+    td::INT4 Uid(uid);
+
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"UPDATE CatBusbar SET EditFlag = (SELECT MAX(JobID) FROM JobCatalogs where CatID = ? and TypeID = 11) where Id=?"));
+
+    db::Params params(pStat->allocParams());
+        params <<Uid<<Uid;
+
+        if(pStat->execute()){
+            std::cout<<"Updated Successfully"<<std::endl;
+            return true;
+        }else
+            std::cout<<"Could not Update"<<std::endl;
+
+        return false;
 }

@@ -107,7 +107,7 @@ bool JunctionPlacement::selectPhaseCode(){
 }
 
 
-bool JunctionPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description)
+bool JunctionPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobId)
 {
 
     if (!pDB)
@@ -118,7 +118,7 @@ bool JunctionPlacement::insertNaming(int uid, QString name, QString alias, int c
     td::INT4 td_cattype(cattype);
     td::INT4 td_phasecode(phasecode);
     td::INT4 td_placementType(PlacementType);
-
+    td::INT4 td_jobid(jobId);
     db::Ref<td::String> refName(20);
     db::Ref<td::String> refAlias(50);
     db::Ref<td::String> refDescription(200);
@@ -136,7 +136,7 @@ bool JunctionPlacement::insertNaming(int uid, QString name, QString alias, int c
 
     //create statement using parameters which will be provided later
 
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?,?)"));
 
     //allocate parameters and bind them to the statement
 
@@ -144,7 +144,7 @@ bool JunctionPlacement::insertNaming(int uid, QString name, QString alias, int c
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType;
+    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType<<td_jobid;
 
     if (!pStat->execute())
     {
@@ -186,7 +186,7 @@ void JunctionPlacement::on_buttonBox_clicked(QAbstractButton *button)
 
     if(button->text() == "OK"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,catalogType,phaseCode,description);
+            insertNaming(uid, name, alias,catalogType,phaseCode,description,globalJobId);
             insertPlacement(uid,PlacementType,globalJobId,sysId);
             insertJobPlacements(sysId,globalJobId,PlacementType,uid);
             QMessageBox::information(this,"Status","Saved successfuly");

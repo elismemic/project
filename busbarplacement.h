@@ -44,7 +44,7 @@ private:
     bool uidExist(QString uid);
     bool updateJobPlacements(int sysId, int jobId, int typeId, int placId);
     bool insertJobPlacements(int sysId, int jobId, int typeId, int placId);
-    bool insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description);//
+    bool insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobid);//
     bool updateNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description);//
     bool updatePlacement(int uid, int sectionType);
     bool selectPhaseCode();

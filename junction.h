@@ -34,7 +34,7 @@ private:
     //bool updateCatalog(int id, int typeId);
     bool insertJobCatalogs(int jobId,int typeId, int catId);
     bool updateJobCatalogs(int jobId, int typeId, int catId);
-    bool insertNaming(int uid, QString name, QString alias, int voltage, QString description);
+    bool insertNaming(int uid, QString name, QString alias, int voltage, QString description,int jobId);
     bool updateNaming(int uid, QString name, QString alias, int voltage, QString description);
     bool insertCatalog(int id, int typeId, int junction);
     bool selectVoltage();

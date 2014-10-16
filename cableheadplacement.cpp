@@ -138,7 +138,7 @@ bool CableHeadPlacement::selectPhaseCode(){
 }
 
 
-bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description)
+bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobId)
 {
 
     if (!pDB)
@@ -149,7 +149,7 @@ bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int 
     td::INT4 td_cattype(cattype);
     td::INT4 td_phasecode(phasecode);
     td::INT4 td_placementType(PlacementType);
-
+    td::INT4 td_jobid(jobId);
     db::Ref<td::String> refName(20);
     db::Ref<td::String> refAlias(50);
     db::Ref<td::String> refDescription(200);
@@ -167,7 +167,7 @@ bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int 
 
     //create statement using parameters which will be provided later
 
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?,?)"));
 
     //allocate parameters and bind them to the statement
 
@@ -175,7 +175,7 @@ bool CableHeadPlacement::insertNaming(int uid, QString name, QString alias, int 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType;
+    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType<<td_jobid;
 
     if (!pStat->execute())
     {
@@ -217,7 +217,7 @@ void CableHeadPlacement::on_buttonBox_clicked(QAbstractButton *button)
 
     if(button->text() == "OK"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,catalogType,phaseCode,description);
+            insertNaming(uid, name, alias,catalogType,phaseCode,description,globalJobId);
             insertPlacement(uid,PlacementType,globalJobId,sysId,sectionType);
             insertJobPlacements(sysId,globalJobId,PlacementType,uid);
             QMessageBox::information(this,"Status","Saved successfuly");
@@ -467,7 +467,7 @@ bool CableHeadPlacement::insertPlacement(int id, int typeId,int jobId, int sysId
     td::INT4 td_sectype(sectype);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacCableHead(Id,TypeId,JobId,SystemId,SectionType) values(?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacCableHead(Id,TypeId,JobId,SystemId,SectionType,EditFlag) values(?,?,?,?,?,0)"));
     db::Params params(pStat->allocParams());
     //bind params
     params <<td_id<<td_typeId<<td_jobId<<td_sysId<<td_sectype;
@@ -495,7 +495,7 @@ bool CableHeadPlacement::insertPlacement(int id, int typeId,int jobId, int sysId
 
 bool CableHeadPlacement::deletePlacement(int uid){
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM PlacCableHead where Id = ? and TypeId = ?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"UPDATE PlacCableHead SET EditFlag=1 where Id = ? and TypeId = ?"));
 
     db::Params params(pStat->allocParams());
         params << uid<<PlacementType;

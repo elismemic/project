@@ -55,12 +55,13 @@ bool Junction::insertCatalog(int id, int typeId, int junction)
     td::INT4 td_id(id);
     td::INT4 td_typeId(typeId);
     td::INT4 td_junction(junction);
+    td::INT4 td_jobId(globalJobId);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatJunction(Id,TypeId,JunctionType) values(?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into CatJunction(Id,TypeId,JobId,JunctionType,EditFlag) values(?,?,?,?,0)"));
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_id<<td_typeId<<td_junction;
+    params <<td_id<<td_typeId<<td_jobId<<td_junction;
 
     if (!pStat->execute())
     {
@@ -83,15 +84,16 @@ bool Junction::insertCatalog(int id, int typeId, int junction)
     return bRet;
 }
 
-bool Junction::insertNaming(int uid, QString name, QString alias, int voltage, QString description)
+bool Junction::insertNaming(int uid, QString name, QString alias, int voltage, QString description, int jobId)
 {
 
     if (!pDB)
         return false;
 
     td::INT4 td_uid(uid);
+    td::INT4 td_job(jobId);
+    //td::INT4 td_typeid(typeId);
     td::INT4 td_voltage(voltage);
-
 
     db::Ref<td::String> refName(20);
     db::Ref<td::String> refAlias(50);
@@ -109,13 +111,13 @@ bool Junction::insertNaming(int uid, QString name, QString alias, int voltage, Q
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,13)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "INSERT INTO CatNaming VALUES (?,?,?,?,?,13,?)"));
 
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params << td_uid << refName << refAlias <<td_voltage <<refDescription;
+    params << td_uid << refName << refAlias <<td_voltage <<refDescription<<td_job;
 
     if (!pStat->execute())
     {
@@ -138,7 +140,7 @@ bool Junction::insertNaming(int uid, QString name, QString alias, int voltage, Q
 
     std::cout<<td_voltage<<std::endl;
     return bRet;
-}
+    }
 
 
 bool Junction::updateNaming(int uid, QString name, QString alias, int voltage, QString description)
@@ -251,7 +253,7 @@ void Junction::on_buttonBox_clicked(QAbstractButton *button){
 
     if(button->text() == "Save"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,ratedVoltage,description);
+            insertNaming(uid, name, alias,ratedVoltage,description,globalJobId);
             insertCatalog(uid,13,junction);
             insertJobCatalogs(globalJobId,13,uid);
             std::cout<<"insert called"<<std::endl;
@@ -436,10 +438,13 @@ bool Junction::deleteNaming(int uid){
 bool Junction::deleteCatalog(int uid){
 
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM CatJunction where Id = ?"));
+    td::INT4 Uid(uid);
+
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"Update CatJunction SET EditFlag=1 where Id = ?"));
 
     db::Params params(pStat->allocParams());
-        params << uid;
+        params << Uid;
+
     if(pStat->execute()){
         std::cout<<"Deleted Successfully"<<std::endl;
         return true;

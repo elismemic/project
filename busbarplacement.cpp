@@ -140,7 +140,7 @@ bool BusbarPlacement::selectPhaseCode(){
 }
 
 
-bool BusbarPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description)
+bool BusbarPlacement::insertNaming(int uid, QString name, QString alias, int cattype, int phasecode, QString description,int jobId)
 {
 
     if (!pDB)
@@ -151,7 +151,7 @@ bool BusbarPlacement::insertNaming(int uid, QString name, QString alias, int cat
     td::INT4 td_cattype(cattype);
     td::INT4 td_phasecode(phasecode);
     td::INT4 td_placementType(PlacementType);
-
+    td::INT4 td_jobid(jobId);
     db::Ref<td::String> refName(20);
     db::Ref<td::String> refAlias(50);
     db::Ref<td::String> refDescription(200);
@@ -169,7 +169,7 @@ bool BusbarPlacement::insertNaming(int uid, QString name, QString alias, int cat
 
     //create statement using parameters which will be provided later
 
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacNaming VALUES(?,?,?,?,?,?,?,?)"));
 
     //allocate parameters and bind them to the statement
 
@@ -177,7 +177,7 @@ bool BusbarPlacement::insertNaming(int uid, QString name, QString alias, int cat
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType;
+    params <<td_uid<<refName<<refAlias<<td_cattype<<td_phasecode << refDescription<<td_placementType<<td_jobid;
 
     if (!pStat->execute())
     {
@@ -219,7 +219,7 @@ void BusbarPlacement::on_buttonBox_clicked(QAbstractButton *button)
 
     if(button->text() == "OK"){
         if(!uidExist(QString::number(uid))){
-            insertNaming(uid, name, alias,catalogType,phaseCode,description);
+            insertNaming(uid, name, alias,catalogType,phaseCode,description,globalJobId);
             insertPlacement(uid,PlacementType,globalJobId,sysId,sectionType);
             insertJobPlacements(sysId,globalJobId,PlacementType,uid);
             QMessageBox::information(this,"Status","Saved successfuly");
@@ -469,7 +469,7 @@ bool BusbarPlacement::insertPlacement(int id, int typeId,int jobId, int sysId, i
     td::INT4 td_sectype(sectype);
 
     db::Transaction trans(pDB);
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacBusbar(Id,TypeId,JobId,SystemId,SectionType) values(?,?,?,?,?)"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT, "Insert into PlacBusbar(Id,TypeId,JobId,SystemId,SectionType,EditFlag) values(?,?,?,?,?,0)"));
     db::Params params(pStat->allocParams());
     //bind params
     params <<td_id<<td_typeId<<td_jobId<<td_sysId<<td_sectype;
@@ -497,7 +497,7 @@ bool BusbarPlacement::insertPlacement(int id, int typeId,int jobId, int sysId, i
 
 bool BusbarPlacement::deletePlacement(int uid){
 
-    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"DELETE FROM PlacBusbar where Id = ? and TypeId = ?"));
+    mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,"UPDATE PlacBusbar SET EditFlag=1 where Id = ? and TypeId = ?"));
 
     db::Params params(pStat->allocParams());
         params << uid<<PlacementType;

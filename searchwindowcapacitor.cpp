@@ -64,7 +64,7 @@ if (!pDB)
 
 
 mem::PointerReleaser<db::IStatement> pStat(pDB->createStatement(db::IStatement::DBS_SELECT,
-                                  "SELECT ID, Name, JobID FROM CatalogCapacitor"));
+                                  "SELECT ID, Name, JobID, MAX(flag) AS Flag FROM CatalogCapacitor WHERE deleted != 1 GROUP BY CatalogCapacitor.[ID] "));
 
 
 cnt::SafeFullVector<db::CPPColumnDesc> columns;
@@ -132,10 +132,16 @@ void SearchWindowCapacitor::on_new_pushButton_clicked()
 
 void SearchWindowCapacitor::on_edit_pushButton_clicked()
 {
-    editClicked = true;
+
     int row = ui->capacitor_tableView->selectionModel()->currentIndex().row();
     searchwindowID = ui->capacitor_tableView->model()->index(row,0).data().toInt();
     searchwindowJobID = ui->capacitor_tableView->model()->index(row,2).data().toInt();
+    if(((searchwindowJobID != jobID) && (searchwindowJobID <= 0)) || (edit == false))
+      {
+         editClicked = false;
+      }
+    else
+        editClicked = true;
 
      // QMessageBox::information(this,"Information",QString::number(searchwindowJobID));
     Capacitor capacitor;
@@ -154,31 +160,19 @@ void SearchWindowCapacitor::on_cancel_pushButton_clicked()
 void SearchWindowCapacitor::on_delete_pushButton_clicked()
 {
 
-    char *a = "Delete FROM CatalogCapacitor WHERE ID = ";
-    char buff[10];
-    char *b = itoa(searchwindowID,buff,10);
-    char *c = (char*)malloc(strlen(a)+strlen(b)+1);
 
-    if(c != NULL)
-    {
-        strcpy(c,a);
-        strcat(c,b);
-    }
+    td::INT4 id(searchwindowID);
 
-     pDB->execDirectly(c);
+    db::Transaction trans(pDB);
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
+                                                "UPDATE CatalogCapacitor SET flag = 1, deleted = 1 WHERE ID = ? AND JobID in (SELECT MIN(JobID)  from CatalogCapacitor WHERE ID = ?)"));
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+    //bind params
+    params << id << id;
+    pStat->execute();
+    trans.commit();
 
-
-    char *d = "Delete FROM CatNaming WHERE ID = ";
-    char buff2[10];
-    char *e = itoa(searchwindowID,buff2,10);
-    char *f = (char*)malloc(strlen(d)+strlen(e)+1);
-    if(f != NULL)
-    {
-        strcpy(f,d);
-        strcat(f,e);
-    }
-
-    pDB->execDirectly(f);
     populateModel();
     ui->delete_pushButton->setEnabled(false);
 }
@@ -209,10 +203,9 @@ void SearchWindowCapacitor::on_capacitor_tableView_clicked(const QModelIndex &in
      searchwindowJobID = val.toInt();
      searchwindowID = a.toInt();
 
-     if(((searchwindowJobID != jobID) && (searchwindowJobID <= 0)) || (edit == false))
-       {
-           ui->edit_pushButton->setEnabled(false);
-       }
+
+     ui->edit_pushButton->setEnabled(true);
+
      if((searchwindowJobID == jobID) && (searchwindowJobID < 0))
      {
          ui->delete_pushButton->setEnabled(true);

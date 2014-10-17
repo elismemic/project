@@ -51,11 +51,16 @@ public:
                          int nominalSection,QString connectionType,
                         float minVoltage, float maxVoltage ,
                        float reactivePower, float activePowerLoss);
-    bool updateCapacitorNaming(int typeID,int ID, QString name, int producerID);
+    bool updateCapacitor2(int id, QString name, QString aliasName, float ratedVoltage,QString numberOfPhases, QString description,
+                         int nominalSection,QString connectionType,
+                        float minVoltage, float maxVoltage ,
+                       float reactivePower, float activePowerLoss);
+    //bool updateCapacitorNaming(int typeID,int ID, QString name, int producerID);
     bool insertJobCat(int);
     int getFlag();
     friend bool actiCap(int,int);
     friend bool editFlag(int);
+    int getMinJobOfCap(int);
 
 
 

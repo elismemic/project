@@ -21,13 +21,36 @@ Capacitor::Capacitor(QWidget *parent) :
    {
            ui->setupUi(this);
            this->setWindowTitle("Capacitor Catalog");
-           if(editClicked == true)
+           if(searchwindowID != 0)
            {
-            QString s = QString::number(searchwindowID);
-            ui->capacitorID_lineEdit->setText(s);
-            ui->capacitorID_lineEdit->setEnabled(false);
-            selectCapacitor();
-            editClicked = false;
+               if(editClicked)
+               {
+                   QString s = QString::number(searchwindowID);
+                   ui->capacitorID_lineEdit->setText(s);
+                   ui->capacitorID_lineEdit->setEnabled(false);
+                   selectCapacitor();
+                   editClicked = false;
+               }
+               else// if(!edit || jobID > 0)
+               {
+                   QString s = QString::number(searchwindowID);
+                   ui->capacitorID_lineEdit->setText(s);
+                   ui->capacitorID_lineEdit->setEnabled(false);
+                   ui->capacitorActivePowerLoss_lineEdit->setEnabled(false);
+                   ui->capacitorAlias_lineEdit->setEnabled(false);
+                   ui->capacitorConnectionType_comboBox->setEnabled(false);
+                   ui->capacitorDescription_plainTextEdit->setEnabled(false);
+                   ui->capacitorID_lineEdit->setEnabled(false);
+                   ui->capacitorMaxVoltage_lineEdit->setEnabled(false);
+                   ui->capacitorMinVoltage_lineEdit->setEnabled(false);
+                   ui->capacitorName_lineEdit->setEnabled(false);
+                   ui->capacitorNominalSection_lineEdit->setEnabled(false);
+                   ui->capacitorNumberOfPhasescomboBox->setEnabled(false);
+                   ui->capacitorRatedVoltage_comboBox->setEnabled(false);
+                   ui->capacitorReactivePower_lineEdit->setEnabled(false);
+                   ui->capacitor_buttonBox->setEnabled(false);
+                   selectCapacitor();
+               }
            }
 
    }
@@ -165,49 +188,48 @@ void Capacitor::setActivePowerLoss(float a)
     ui->capacitorActivePowerLoss_lineEdit->setText(s);
 }
 
-bool Capacitor::updateCapacitorNaming(int typeID,int id, QString name, int producerID)
-{
-    td::INT4 insert_TypeID(5);
-    td::INT4 insert_ID(id);
-    td::INT4 insert_producerID(producerID);
+//bool Capacitor::updateCapacitorNaming(int typeID,int id, QString name, int producerID)
+//{
+//    td::INT4 insert_TypeID(5);
+//    td::INT4 insert_ID(id);
+//    td::INT4 insert_producerID(producerID);
 
 
-    db::Ref<td::String> refName(50);
-    td::String td_name = name.toUtf8();
-    refName = td_name;
+//    db::Ref<td::String> refName(50);
+//    td::String td_name = name.toUtf8();
+//    refName = td_name;
 
 
-    //start transaction log
-    db::Transaction trans(pDB);
+//    //start transaction log
+//    db::Transaction trans(pDB);
 
-    //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
-       "UPDATE CatNaming SET TypeID=?,Name=?,ProducerID=? WHERE ID=?"));
+//    //create statement using parameters which will be provided later
 
+//    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT,
+//       "INSERT INTO CatNaming(TypeID,ID,Name,ProducerID) VALUES (?,?,?,?)"));
+//    //allocate parameters and bind them to the statement
+//    db::Params params(pStat->allocParams());
+//    //bind params
+//    params << insert_TypeID << insert_ID << refName << insert_producerID  ;
+//     QMessageBox::information(this,"Information",QString::number(insert_ID));
 
-    //allocate parameters and bind them to the statement
-    db::Params params(pStat->allocParams());
-    //bind params
-    params << insert_TypeID << refName << insert_producerID  << insert_ID;
+//    if (!pStat->execute())
+//    {
+//        td::String strErr;
+//        pStat->getErrorStr(strErr);
+//        if (DebugTrace(1000))
+//            mu::getTracer() << strErr;
+//        //rollback will be called
+//        return false;
+//    }
 
+//    //commit transaction
+//    bool  bRet = trans.commit();
 
-    if (!pStat->execute())
-    {
-        td::String strErr;
-        pStat->getErrorStr(strErr);
-        if (DebugTrace(1000))
-            mu::getTracer() << strErr;
-        //rollback will be called
-        return false;
-    }
-
-    //commit transaction
-    bool  bRet = trans.commit();
-
-    if (DebugTrace(1000))
-        mu::getTracer() << "Insert finished!\n";
-    return bRet;
-}
+//    if (DebugTrace(1000))
+//        mu::getTracer() << "Insert finished!\n";
+//    return bRet;
+//}
 
 bool Capacitor::updateCapacitor(int id, QString name, QString aliasName, float ratedVoltage,QString numberOfPhases, QString description,
                      int nominalSection,QString connectionType,
@@ -247,16 +269,86 @@ bool Capacitor::updateCapacitor(int id, QString name, QString aliasName, float r
     db::Transaction trans(pDB);
 
     //create statement using parameters which will be provided later
-    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
-       "UPDATE CatalogCapacitor SET Description=?,JobID=?,TypeID=?,Alias=?,ConnectionType=?,NumberOfPhases=?,RatedVoltage=?,MaxVoltage=?,MinVoltage=?,NominalSection=?,ReactivePower=?,ActivePowerLoss=?,Name=?,flag=? WHERE ID = ?"));
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_INSERT,
+    "INSERT INTO CatalogCapacitor(Description,JobID,TypeID,ID,Alias,ConnectionType,NumberOfPhases,RatedVoltage,MaxVoltage,MinVoltage,NominalSection,ReactivePower,ActivePowerLoss,Name,flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"));
+
 
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
     //bind params
-    params << refDescription << insert_JobID << insert_TypeID << refAliasName << refConnectionType << refNumberOfPhases
-           << ratedVoltage << maxVoltage << minVoltage << insert_nominalSection << reactivePower << activePowerLoss << refName << insert_flag << insert_ID;
+    params << refDescription << insert_JobID << insert_TypeID << insert_ID << refAliasName << refConnectionType << refNumberOfPhases
+           << ratedVoltage << maxVoltage << minVoltage << insert_nominalSection << reactivePower << activePowerLoss << refName << insert_flag;
 
+
+    if (!pStat->execute())
+    {
+        td::String strErr;
+        pStat->getErrorStr(strErr);
+        if (DebugTrace(1000))
+            mu::getTracer() << strErr;
+        //rollback will be called
+        return false;
+    }
+
+    //commit transaction
+    bool  bRet = trans.commit();
+    if (bRet)
+       QMessageBox::information(this,"Database Info","Data Updated");
+
+    if (DebugTrace(1000))
+        mu::getTracer() << "Update finished!\n";
+    return bRet;
+
+}
+
+bool Capacitor::updateCapacitor2(int id, QString name, QString aliasName, float ratedVoltage,QString numberOfPhases, QString description,
+                     int nominalSection,QString connectionType,
+                    float minVoltage, float maxVoltage ,
+                   float reactivePower, float activePowerLoss)
+{
+    if (!pDB)
+        return false;
+
+    td::INT4 insert_ID(id);
+    td::INT4 insert_nominalSection(nominalSection);
+    td::INT4 insert_TypeID(5);
+    td::INT4 insert_JobID(jobID);
+
+     td::INT4 insert_flag(getFlag());
+
+    db::Ref<td::String> refName(50);
+    db::Ref<td::String> refAliasName(50);
+    db::Ref<td::String> refConnectionType(50);
+    db::Ref<td::String> refNumberOfPhases(50);
+    db::Ref<td::String> refDescription(200);
+
+
+    td::String td_name = name.toUtf8();
+    td::String td_aliasName = aliasName.toUtf8();
+    td::String td_description = description.toUtf8();
+    td::String td_connectionType = connectionType.toUtf8();
+    td::String td_numberOfPhases = numberOfPhases.toUtf8();
+
+    refName = td_name;
+    refAliasName = td_aliasName;
+    refDescription = td_description;
+    refConnectionType = td_connectionType;
+    refNumberOfPhases = td_numberOfPhases;
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
+           "UPDATE CatalogCapacitor SET Description=?,Alias=?,ConnectionType=?,NumberOfPhases=?,RatedVoltage=?,MaxVoltage=?,MinVoltage=?,NominalSection=?,ReactivePower=?,ActivePowerLoss=?,Name=?,flag=? WHERE ID = ? and JobID = ?"));
+
+
+        //allocate parameters and bind them to the statement
+        db::Params params(pStat->allocParams());
+        //bind params
+        params << refDescription << refAliasName << refConnectionType << refNumberOfPhases
+               << ratedVoltage << maxVoltage << minVoltage << insert_nominalSection << reactivePower << activePowerLoss << refName << insert_flag << insert_ID << insert_JobID;
 
     if (!pStat->execute())
     {
@@ -406,7 +498,7 @@ bool Capacitor::insertCapacitor(int id, QString name, QString aliasName, float r
         return false;
 
     td::INT4 insert_ID(id);
-    td::INT4 insert_flag(1);
+    td::INT4 insert_flag(0);
     td::INT4 insert_nominalSection(nominalSection);
     td::INT4 insert_TypeID(5);
     td::INT4 insert_JobID(jobID);
@@ -591,7 +683,6 @@ int Capacitor::getFlag()
 
         MyModel *model = new MyModel(this, rs, true);
         QModelIndex idx = model->index(0,0);
-      //  QMessageBox::information(this,"Information",model->data(idx, Qt::DisplayRole).toString());
         return  model->data(idx, Qt::DisplayRole).toInt();
 
 }
@@ -601,14 +692,14 @@ bool editFlag(int jobID)
         return false;
 
     td::INT4 id(jobID);
-    td::INT4 flag(0);
+    td::INT4 flag(1);
 
 
     //start transaction log
     db::Transaction trans(pDB);
     //create statement using parameters which will be provided later
     db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_UPDATE,
-       "Update CatalogCapacitor SET flag = ? WHERE JobID = ?"));
+       "Update CatalogCapacitor SET flag = ? WHERE JobID = ? and flag = 0"));
 
     //allocate parameters and bind them to the statement
     db::Params params(pStat->allocParams());
@@ -638,7 +729,7 @@ bool actiCap(int newID,int oldID)
     if (!pDB)
         return false;
 
-    td::INT4 id(oldID);
+    td::INT4 id(oldID);//cap that belong to this jobid need to avtivate
     td::INT4 refid(newID + 1);
 
 
@@ -671,25 +762,78 @@ bool actiCap(int newID,int oldID)
     editFlag(newID + 1);
     return bRet;
 }
+int Capacitor::getMinJobOfCap(int id)
+{
+    td::INT4 capID(id);
+
+    //start transaction log
+    db::Transaction trans(pDB);
+
+    //create statement using parameters which will be provided later
+    db::StatementPtr pStat(pDB->createStatement(db::IStatement::DBS_SELECT,
+       "Select JobID FROM CatalogCapacitor WHERE ID = ? ORDER by JobID ASC LIMIT 1"));
+
+
+    //allocate parameters and bind them to the statement
+    db::Params params(pStat->allocParams());
+    //bind params
+    params << capID;
+
+
+    cnt::SafeFullVector<db::CPPColumnDesc> columns;
+        columns.reserve(1);
+
+
+        columns[0].name = "JobID";
+        columns[0].tdType = td::int4;
+        columns[0].len = 0;
+
+        db::Recordset* rs = new db::Recordset(columns);
+
+        if (!rs->load(pStat.getPtr()))
+            exit(0);
+
+        MyModel *model = new MyModel(this, rs, true);
+        QModelIndex idx = model->index(0,0);
+
+        return  model->data(idx, Qt::DisplayRole).toInt();
+
+}
 
 void Capacitor::on_capacitor_buttonBox_accepted()
 {
 
     if(searchwindowID != 0)
     {
-        if(updateCapacitorNaming(5,searchwindowID,getName(),2))
+        if(getMinJobOfCap(searchwindowID) != jobID) // insert new row in the table
         {
-        updateCapacitor(searchwindowID, getName(), getAlias(), getRatedVoltage(),getNumberOfPhases(), getDescription(),
+
+            if( updateCapacitor(searchwindowID, getName(), getAlias(), getRatedVoltage(),getNumberOfPhases(), getDescription(),
                         getNominalSection(),getConnectionType(),
                        getMinVoltage(), getMaxVoltage() ,
-                      getReactivePower(), getActivePowerLoss());
-        insertJobCat(searchwindowID);
-        close();
+                      getReactivePower(), getActivePowerLoss()))
+            { //end if
+                insertJobCat(searchwindowID);
+                close();
+            }
+            else
+            {
+                 QMessageBox::information(this,"Information","Could not update data!");
+            }
+        }
+        else if( updateCapacitor2(searchwindowID, getName(), getAlias(), getRatedVoltage(),getNumberOfPhases(), getDescription(),
+                    getNominalSection(),getConnectionType(),
+                   getMinVoltage(), getMaxVoltage() ,
+                  getReactivePower(), getActivePowerLoss()))
+        { //end if
+
+            close();
         }
         else
         {
-            QMessageBox::information(this,"Information","Could not update data!");
+             QMessageBox::information(this,"Information","Could not update data!");
         }
+
     }
     else
     {

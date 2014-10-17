@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     connectSQLite();
+    l = new QLabel(ui->statusbar);
 }
 
 MainWindow::~MainWindow()
@@ -72,9 +73,9 @@ void MainWindow::on_actionOpen_triggered()
             status = "Current User ID = " + QString::number(userID)+ " Job ID = " + QString::number(jobID) + " User ID of job owner = " + QString::number(user_jobID)+ " Edit Mode";
         else
             status = "Current User ID = " + QString::number(userID)+ " Job ID = " + QString::number(jobID) + " User ID of job owner = " + QString::number(user_jobID)+ " Browse Mode";
-        ui->statusbar->showMessage(status);
-        setStatusTip(status);
-        setStatusBar(ui->statusbar);
+        l->setText(status);
+        ui->statusbar->insertPermanentWidget(0,l);
+
     }
     else
         QMessageBox::information(this,"Error ... ","Select user before exploring jobs!");
@@ -82,6 +83,7 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionOpen_2_triggered()
 {
+
     user u;
     u.setModal(true);
     u.exec();
@@ -101,16 +103,5 @@ void MainWindow::on_actionCapacitor_triggered()
 
 }
 
-void MainWindow::on_actionConductor_triggered()
-{
-    //SearchWindowConductor searchConductor;
-    //searchConductor.setModal(true);
-    //searchConductor.exec();
-}
-
-void MainWindow::on_actionCapPlac_triggered()
-{
-    //SearchWindowBankPlacement capacitorbankplacement;
-    //capacitorbankplacement.setModal(true);
-    //capacitorbankplacement.exec();
-}
+void MainWindow::on_actionConductor_triggered(){}
+void MainWindow::on_actionCapPlac_triggered(){}

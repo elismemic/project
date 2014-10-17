@@ -40,19 +40,11 @@
     <property name="title">
      <string>Catalogs</string>
     </property>
-    <addaction name="actionConductor"/>
     <addaction name="actionCapacitor"/>
-   </widget>
-   <widget class="QMenu" name="menuPlacements">
-    <property name="title">
-     <string>Placements</string>
-    </property>
-    <addaction name="actionCapPlac"/>
    </widget>
    <addaction name="menuUsers"/>
    <addaction name="menuJobs"/>
    <addaction name="menuCatalogs"/>
-   <addaction name="menuPlacements"/>
   </widget>
   <action name="actionOpen">
    <property name="text">

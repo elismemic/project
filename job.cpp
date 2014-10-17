@@ -18,7 +18,7 @@ extern int userID;
 extern int user_jobID;
 extern int jobID;
 extern bool edit;
-int max = 0;
+int max = 1;
 
 job::job(QWidget *parent) :
     QDialog(parent),
